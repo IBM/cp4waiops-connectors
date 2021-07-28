@@ -1,0 +1,24 @@
+apiVersion: aiopsedge.management.ibm.com/v1beta1
+kind: AIOpsBundleManifest
+metadata:
+  name: open-weather
+spec:
+  deployments:         
+  - name:  open-weather-grpc-server
+    valueFrom:
+      configMapKeyRef:
+        name: acme-connector-events-configmap
+        key: deployment
+    target: server-core
+    containers:
+    - image: image-registry.openshift-image-registry.svc:5000/aiops/open-weather-grpc-server:1.0.0
+  - name:  open-weather-grpc-client
+    target: micro-edge
+    containers:
+    - image: image-registry.openshift-image-registry.svc:5000/aiops/open-weather-grpc-client:1.0.0
+    actions:
+    - name: open-weather-async
+      valueFrom:
+        configMapKeyRef:
+          name: open-weather-configmap
+          key: asyncapi
