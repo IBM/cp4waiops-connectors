@@ -1,0 +1,23 @@
+apiVersion: aiopsedge.management.ibm.com/v1beta1
+kind: ConnectorSchema
+metadata:
+  name: mock-async-connector
+  namespace: aiopsedge
+spec:
+  documentation: https://json-schema.org/understanding-json-schema/
+  categories:
+    - events
+  ceType: 'com.ibm.aiopsedge.mock.async'
+  components:
+    - name: async-manager
+      apiType: AsyncAPI
+  schema:
+    type: object
+    properties:
+      contentMode:
+        type: string
+        enum:
+          - Structured
+          - Binary
+    required:
+      - contentMode
