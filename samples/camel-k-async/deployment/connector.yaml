@@ -1,9 +1,9 @@
 apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:
-  name: mock-async-connector
+  name: {{ .Instance.Name }}-mock-async-connector
 spec:
-  serviceAccountName: mock
+  serviceAccountName: {{ .Instance.Name }}-mock
   configuration:
     - type: secret
       value: kafka-secrets
