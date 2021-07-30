@@ -3,4 +3,4 @@ kind: ServiceAccount
 metadata:
   name: {{ .Instance.Name }}-mock
   finalizers:
-    - com.ibm.test
+    - ibm-management-finalizer
