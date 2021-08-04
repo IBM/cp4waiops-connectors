@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: connector-bridge
+  labels:
+    app: connector-bridge
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: connector-bridge
+  template:
+    metadata:
+      labels:
+        app: connector-bridge
+    spec:
+      restartPolicy: Always
+      serviceAccountName: connector-bridge
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values:
+                      - amd64
+                  - key: kubernetes.io/os
+                    operator: In
+                    values:
+                      - linux
+      containers:
+      - image: quay.io/zach_robinson/connector-bridge:amd64-latest
+        imagePullPolicy: Always
+        name: connector-bridge
+        resources:
+          limits:
+            cpu: 100m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 64Mi
+        volumeMounts:
+          - mountPath: /config/kafka
+            name: kafkaconf
+            readOnly: true
+          - mountPath: /config/tls
+            name: cert
+            readOnly: true
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+      hostNetwork: false
+      hostPID: false
+      hostIPC: false
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: kafkaconf
+          secret:
+            secretName: aiopsedge-kafka-application-secret
+        - name: cert
+          secret:
+            secretName: connector-bridge-cert-secret
