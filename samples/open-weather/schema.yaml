@@ -1,17 +1,8 @@
 apiVersion: aiopsedge.management.ibm.com/v1beta1
 kind: ConnectorSchema
 metadata:
-  name: open-weather-schema
+  name: msteams-schema
 spec:
-  schema: 
-    type: object
-    properties:
-      uri:
-        type: string
-        format: uri
-        title: URI
-        description: URI of the Open Weather instance
-      token:
-        type: string
-        title: Token
-        description: Token of the Open Weather instance
+  uiSchema: 
+    ...
+
