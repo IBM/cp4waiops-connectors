@@ -3,7 +3,6 @@ kind: Service
 metadata:
   name: connector-bridge
   annotations: 
-    service.beta.openshift.io/serving-cert-secret-name: connector-bridge-cert-secret
     aiops.route.create.enabled: "true"
 spec:
   selector:
