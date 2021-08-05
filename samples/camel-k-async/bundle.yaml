@@ -1,0 +1,8 @@
+apiVersion: aiopsedge.management.ibm.com/v1alpha1
+kind: BundleManifest
+metadata:
+  name: camel-k-async-mock-connector
+spec:
+  schemaPath: /samples/camel-k-async/mock-async-connector-schema.yaml
+  repo: https://github.com/IBM/cp4waiops-connectors
+  connectorDeploymentPath: /samples/camel-k-async/deployment
