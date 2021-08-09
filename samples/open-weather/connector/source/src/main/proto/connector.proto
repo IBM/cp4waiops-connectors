@@ -31,9 +31,8 @@ message ConnectorResponse {
 // Connector Bridge Service
 service ConnectorBridge {
   rpc Produce(stream io.cloudevents.v1.CloudEvent) returns(io.cloudevents.v1.CloudEvent) {}
-  rpc StatusMessage(stream io.cloudevents.v1.CloudEvent) returns(io.cloudevents.v1.CloudEvent) {}
   rpc Consume(io.cloudevents.v1.CloudEvent) returns(stream io.cloudevents.v1.CloudEvent) {}
   rpc Configuration(io.cloudevents.v1.CloudEvent) returns(stream io.cloudevents.v1.CloudEvent) {}
-  rpc StatusResponse(ConnectorResponse) returns(CloudEvent) {}
+  rpc Status(ConnectorResponse) returns(CloudEvent) {}
 }
 
