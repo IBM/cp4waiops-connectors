@@ -33,6 +33,6 @@ service ConnectorBridge {
   rpc Produce(stream io.cloudevents.v1.CloudEvent) returns(io.cloudevents.v1.CloudEvent) {}
   rpc Consume(io.cloudevents.v1.CloudEvent) returns(stream io.cloudevents.v1.CloudEvent) {}
   rpc Configuration(io.cloudevents.v1.CloudEvent) returns(stream io.cloudevents.v1.CloudEvent) {}
-  rpc Status(ConnectorResponse) returns(CloudEvent) {}
+  rpc Status(ConnectorStatus) returns(CloudEvent) {}
 }
 
