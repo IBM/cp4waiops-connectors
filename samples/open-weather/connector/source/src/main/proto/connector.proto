@@ -6,42 +6,33 @@ import "spec.proto";
 
 option java_multiple_files = true;
 
-service ConnectorService {
-    //The connector "calls home" with its ID and starts to receive configuration (initial + subsequent updates)
-    rpc configuration (ConnectorID) returns (stream ConnectorConfiguration) {}
-
-    //The connector periodically sends status to the server. No response required
-    rpc status(stream ConnectorStatus) returns (google.protobuf.Empty) {}
-
-    //This bi-directional stream mimics a Kafka bus. 
-    //The server-side will interact with the Kafka broker accordingly
-    rpc dataChannel (stream OutboundData) returns (stream InboundData) {}
-}
-
-// This structure is used in every outbound call, so that the server know who it's from
-message ConnectorID {
-  string id = 1;
-  string type = 2;
-}
-
-message ConnectorConfiguration {
-  string config = 1;
-}
-
 message ConnectorStatus {
-  ConnectorID id = 1;
-  string status = 2;
-  string msg = 3;
+  string connectionid = 1;
+  string componentname = 2;
+  string reqId = 3;
+
+  enum Phase {
+    Unknown = 0;
+    Accepted = 1;
+    Retrying = 2;
+    Running = 3;
+    Done = 4;
+    Initializing = 5;
+    Terminating = 6;
+    Deleted = 7;
+    Errored = 8;
+    Disabled = 9;
+  }
+  Phase phase = 4;
+  map<string, string> resources = 5;
+  int64 requeueAfter = 6;
 }
 
-message OutboundData {
-  ConnectorID id = 1;
-  string topic = 2;
-  io.cloudevents.v1.CloudEvent msg = 3;
-}
-
-message InboundData {
-  string topic = 1;
-  io.cloudevents.v1.CloudEvent msg = 2;
+// Connector Bridge Service
+service ConnectorBridge {
+  rpc Produce(stream io.cloudevents.v1.CloudEvent) returns(io.cloudevents.v1.CloudEvent) {}
+  rpc Consume(io.cloudevents.v1.CloudEvent) returns(stream io.cloudevents.v1.CloudEvent) {}
+  rpc Configuration(io.cloudevents.v1.CloudEvent) returns(stream io.cloudevents.v1.CloudEvent) {}
+  rpc Status(ConnectorStatus) returns(CloudEvent) {}
 }
 
