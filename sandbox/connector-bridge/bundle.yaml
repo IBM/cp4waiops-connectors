@@ -1,4 +1,4 @@
-apiVersion: aiopsedge.management.ibm.com/v1alpha1
+apiVersion: cp4waiops.management.ibm.com/v1alpha1
 kind: BundleManifest
 metadata:
   name: connector-bridge
