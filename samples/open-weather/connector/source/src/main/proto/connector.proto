@@ -6,7 +6,7 @@ import "spec.proto";
 
 option java_multiple_files = true;
 
-message ConnectorResponse {
+message ConnectorStatus {
   string connectionid = 1;
   string componentname = 2;
   string reqId = 3;
