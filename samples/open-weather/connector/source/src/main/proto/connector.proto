@@ -22,6 +22,7 @@ message ConnectorStatus {
     Deleted = 7;
     Errored = 8;
     Disabled = 9;
+    Disabling = 10;
   }
   Phase phase = 4;
   map<string, string> resources = 5;
