@@ -1,4 +1,4 @@
-apiVersion: aiopsedge.management.ibm.com/v1beta1
+apiVersion: connectors.aiops.ibm.com/v1beta1
 kind: ConnectorSchema
 metadata:
   name: msteams-schema
