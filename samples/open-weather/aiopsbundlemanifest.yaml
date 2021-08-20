@@ -5,4 +5,4 @@ metadata:
 spec:
   schemaPath: /samples/open-weather/schema.yaml
   repo: https://github.com/IBM/cp4waiops-connectors
-  connectorDeploymentPath: /samples/open-weather/deployment
+  deploymentPath: /samples/open-weather/deployment

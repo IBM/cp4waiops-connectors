@@ -4,4 +4,4 @@ metadata:
   name: connector-bridge
 spec:
   repo: https://github.com/IBM/cp4waiops-connectors
-  connectorDeploymentPath: /sandbox/connector-bridge/deployment
+  deploymentPath: /sandbox/connector-bridge/deployment
