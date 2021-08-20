@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: connector-bridge
   annotations: 
-    aiops.route.create.enabled: "true"
+    connectors.aiops.ibm.com/route-create-enabled: "true"
 spec:
   selector:
     app: connector-bridge
