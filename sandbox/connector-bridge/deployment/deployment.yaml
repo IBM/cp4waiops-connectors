@@ -47,6 +47,9 @@ spec:
           - mountPath: /config/tls
             name: cert
             readOnly: true
+          - mountPath: /config/tls_client
+            name: client
+            readOnly: true
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -66,3 +69,6 @@ spec:
         - name: cert
           secret:
             secretName: connector-bridge-cert-secret
+        - name: client
+          secret:
+            secretName: aiopsedge-client-cert
