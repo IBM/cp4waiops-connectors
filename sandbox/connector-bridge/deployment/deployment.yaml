@@ -30,34 +30,66 @@ spec:
                     values:
                       - linux
       containers:
-      - image: quay.io/zach_robinson/connector-bridge:amd64-latest
-        imagePullPolicy: Always
-        name: connector-bridge
-        resources:
-          limits:
-            cpu: 100m
-            memory: 256Mi
-          requests:
-            cpu: 100m
-            memory: 64Mi
-        volumeMounts:
-          - mountPath: /config/kafka
-            name: kafkaconf
-            readOnly: true
-          - mountPath: /config/tls
-            name: cert
-            readOnly: true
-          - mountPath: /config/tls_client
-            name: client
-            readOnly: true
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          privileged: false
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
+        - image: quay.io/zach_robinson/connector-bridge:amd64-latest
+          imagePullPolicy: Always
+          name: connector-bridge
+          resources:
+            limits:
+              cpu: 100m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          livenessProbe:
+            exec:
+              command:
+                - grpc_health_probe
+                - --addr=localhost:8443
+                - --connect-timeout=4s
+                - --rpc-timeout=4s
+                - --tls
+                - --tls-ca-cert=/config/tls/ca.crt
+                - --tls-client-cert=/config/tls_client/tls.crt
+                - --tls-client-key=/config/tls_client/tls.key
+            initialDelaySeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 10
+            timeoutSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - grpc_health_probe
+                - --addr=localhost:8443
+                - --connect-timeout=2s
+                - --rpc-timeout=2s
+                - --tls
+                - --tls-ca-cert=/config/tls/ca.crt
+                - --tls-client-cert=/config/tls_client/tls.crt
+                - --tls-client-key=/config/tls_client/tls.key
+            initialDelaySeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 5
+            timeoutSeconds: 5
+          volumeMounts:
+            - mountPath: /config/kafka
+              name: kafkaconf
+              readOnly: true
+            - mountPath: /config/tls
+              name: cert
+              readOnly: true
+            - mountPath: /config/tls_client
+              name: client
+              readOnly: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
       hostNetwork: false
       hostPID: false
       hostIPC: false
@@ -72,3 +104,4 @@ spec:
         - name: client
           secret:
             secretName: aiopsedge-client-cert
+
