@@ -33,10 +33,17 @@ spec:
         - image: quay.io/zach_robinson/connector-bridge:amd64-latest
           imagePullPolicy: Always
           name: connector-bridge
+          ports:
+            - containerPort: 8443
+              name: grpc
+              protocol: TCP
+            - containerPort: 8080
+              name: metrics
+              protocol: TCP
+          env:
+            - name: NUM_PRODUCERS
+              value: "2"
           resources:
-            limits:
-              cpu: 100m
-              memory: 256Mi
             requests:
               cpu: 100m
               memory: 64Mi
