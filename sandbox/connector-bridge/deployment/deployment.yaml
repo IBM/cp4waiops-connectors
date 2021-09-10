@@ -40,9 +40,6 @@ spec:
             - containerPort: 8080
               name: metrics
               protocol: TCP
-          env:
-            - name: NUM_PRODUCERS
-              value: "2"
           resources:
             requests:
               cpu: 250m
