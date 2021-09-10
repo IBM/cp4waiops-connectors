@@ -33,13 +33,22 @@ spec:
         - image: quay.io/zach_robinson/connector-bridge:amd64-latest
           imagePullPolicy: Always
           name: connector-bridge
+          ports:
+            - containerPort: 8443
+              name: grpc
+              protocol: TCP
+            - containerPort: 8080
+              name: metrics
+              protocol: TCP
           resources:
-            limits:
-              cpu: 100m
-              memory: 256Mi
             requests:
-              cpu: 100m
+              cpu: 250m
               memory: 64Mi
+              ephemeral-storage: "0"
+            limits:
+              cpu: "1"
+              memory: 500Mi
+              ephemeral-storage: 200Mi
           livenessProbe:
             exec:
               command:

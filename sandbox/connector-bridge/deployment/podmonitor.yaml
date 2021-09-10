@@ -1,0 +1,14 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: connector-bridge
+spec:
+  namespaceSelector: {}
+  podMetricsEndpoints:
+  - bearerTokenSecret:
+      key: ""
+    port: metrics
+  selector:
+    matchLabels:
+      app: connector-bridge
+
