@@ -1,7 +1,0 @@
-apiVersion: connectors.aiops.ibm.com/v1alpha1
-kind: BundleManifest
-metadata:
-  name: connector-bridge
-spec:
-  repo: https://github.com/IBM/cp4waiops-connectors
-  deploymentPath: /sandbox/connector-bridge/deployment
