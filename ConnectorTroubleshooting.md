@@ -25,13 +25,15 @@ In practice, this generally means either modifying the `/config/server.xml` file
 ### BundleManifest is in a Retrying State
 
 When there is a problem found retrieving or using the bundle referenced by the BundleManifest resource, the status
-will show that it is either in an errored or retrying state. If the RepositoryReady status condition on the
-BundleManifest resource is failing, this would indicate that the repository could not be pulled. Either the repository
-does not exist, or it cannot be accessed due to a network or authentication error. Refer to the BundleManifest
-documentation to address this. If the DeployablesReady condition is failing, then the resources are failing to
-deploy. Check the Kubernetes events for the BundleManifest and GitApp resources. These can be observed on the OpenShift
-events page, or by querying the Kubernetes api: `oc get events`. These events will contain more detailed information
-that can be used to determine the problem.
+will show that it is either in an errored or retrying state.
+
+If the RepositoryReady status condition on the BundleManifest resource is failing, this would indicate that the
+repository could not be pulled. Either the repository does not exist, or it cannot be accessed due to a network or authentication error. Refer to the BundleManifest documentation to address this.
+
+If the DeployablesReady condition is failing, then the resources are failing to deploy. Check the Kubernetes events for
+the BundleManifest and GitApp resources. These can be observed on the OpenShift events page, or by querying the
+Kubernetes api: `oc get events`. These events will contain more detailed information that can be used to determine the
+problem.
 
 ### GitApp Event Contains: Attempted to Overwrite Resource
 
