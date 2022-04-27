@@ -39,4 +39,4 @@ To upgrade to another version of the SDK, modify the value of `CONNECTOR_SDK_VER
    - Connectorschema : For creating a connector for a data source that is not yet supported in Watson AIOps you first need to create a ConnectorSchema. ConnectorSchema CR provides content for the UI to render the corresponding form in the Data and tool integrations section of the product and it validates completed UI forms. Refer the example in ui-schema details section.
    - Microedgeconfiguration CR: If the connector supports remote orchestration create the microedgeconfiguration CR in order for the bootstrap script to provide the container image location to download and run on a remote VM.
 - Create the standard k8s deployment artifacts : Deployment, service, serviceaccount etc.
-- Refer example BundleManifest template with folder structre and files : (add link when available)
+- Refer example BundleManifest template with folder structre and files : https://github.com/IBM/cp4waiops-connectors-java-template/tree/main/bundle-artifacts
