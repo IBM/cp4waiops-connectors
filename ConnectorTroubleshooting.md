@@ -117,6 +117,14 @@ should use their own connection. This can also be seen if the connector componen
 does not match the component name being used by the connector. In that case, change the ConnectorSchema and connector
 code so that they match.
 
+### After a Connection Is Created, No Connection Pod Comes Up
+- Your `ConnectorConfiguration` instance may have no status for several minutes
+- After 5 minutes the `ConnetorConfiguration` instance shows the error `unable to determine status of Connector component, connection may have been interrupted`
+- No connection pod starts up
+
+Check the events via `oc get events` and search for your connector's name. You may see errors like:
+`failed to get status of prereqs GitApp`
+
 ## Performance Issues
 
 The connector should have a metrics endpoint available at either `/h/metrics` or `/metrics` that can be used to
@@ -168,11 +176,3 @@ sum by (channel_name)(irate(connector_sdk_produce_sent_total{connector_id="dabc7
 ```
 sum by (channel_name)(irate(connector_sdk_produce_verified_total{connector_id="dabc7a3f-9c44-4505-8890-58907297cd7b"}[1m]) * 60)
 ```
-
-### After a Connection Is Created, No Connection Pod Comes Up
-- Your `ConnectorConfiguration` instance may have no status for several minutes
-- After 5 minutes the `ConnetorConfiguration` instance shows the error `unable to determine status of Connector component, connection may have been interrupted`
-- No connection pod starts up
-
-Check the events via `oc get events` and search for your connector's name. You may see errors like:
-`failed to get status of prereqs GitApp`
