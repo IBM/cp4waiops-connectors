@@ -46,6 +46,15 @@ This event indicates that the GitApp failed to install or update because it conf
 by another GitApp. For the two to be compatible, the conflicting resource will need to be renamed in one of the
 bundles.
 
+## Connector Pod Errors
+### After a Connection Is Created, No Connection Pod Comes Up
+- Your `ConnectorConfiguration` instance may have no status for several minutes
+- After 5 minutes the `ConnetorConfiguration` instance shows the error `unable to determine status of Connector component, connection may have been interrupted`
+- No connection pod starts up
+
+Check the events via `oc get events` and search for your connector's name. You may see errors like:
+`failed to get status of prereqs GitApp`
+
 ## Communication Errors Between the Connector and the CP4WAIOps Server
 
 The following sections address communication errors that users may run into.
@@ -116,14 +125,6 @@ can be seen in development if multiple users are using the same connection. To r
 should use their own connection. This can also be seen if the connector component name defined in the ConnectorSchema
 does not match the component name being used by the connector. In that case, change the ConnectorSchema and connector
 code so that they match.
-
-### After a Connection Is Created, No Connection Pod Comes Up
-- Your `ConnectorConfiguration` instance may have no status for several minutes
-- After 5 minutes the `ConnetorConfiguration` instance shows the error `unable to determine status of Connector component, connection may have been interrupted`
-- No connection pod starts up
-
-Check the events via `oc get events` and search for your connector's name. You may see errors like:
-`failed to get status of prereqs GitApp`
 
 ## Performance Issues
 
