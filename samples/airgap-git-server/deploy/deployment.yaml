@@ -1,0 +1,150 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: connector-airgap
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: connector-airgap
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: connector-airgap
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
+                - ppc64le
+      containers:
+      - image: replaceme
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /server-status
+            port: https
+            scheme: HTTPS
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 10
+        name: server
+        ports:
+        - containerPort: 8080
+          name: https
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /server-status
+            port: https
+            scheme: HTTPS
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: "1"
+            ephemeral-storage: 200Mi
+            memory: 250Mi
+          requests:
+            cpu: 5m
+            ephemeral-storage: "0"
+            memory: 100Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /conf
+          name: pass
+          readOnly: true
+        - mountPath: /tls
+          name: certs
+          readOnly: true
+        - mountPath: /etc/httpd/conf.d/tls.conf
+          name: cm
+          readOnly: true
+          subPath: tls.conf
+        - mountPath: /etc/httpd/run
+          name: run
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: replaceme
+      initContainers:
+      - args:
+        - -c
+        - htpasswd -bc /conf/.htpasswd ${username} ${password}
+        command:
+        - bash
+        envFrom:
+        - secretRef:
+            name: connector-airgap-auth-secret
+        image: replaceme
+        imagePullPolicy: Always
+        name: gen-htpasswd
+        resources:
+          limits:
+            cpu: "1"
+            ephemeral-storage: 200Mi
+            memory: 250Mi
+          requests:
+            cpu: 5m
+            ephemeral-storage: "0"
+            memory: 100Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /conf
+          name: pass
+        - mountPath: /tmp
+          name: tmp
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccountName: connector-airgap
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - emptyDir: {}
+        name: pass
+      - configMap:
+          defaultMode: 420
+          name: connector-airgap-server-config
+        name: cm
+      - name: certs
+        secret:
+          defaultMode: 420
+          secretName: connector-airgap-cert-secret
+      - emptyDir: {}
+        name: tmp
+      - emptyDir: {}
+        name: run
