@@ -1,0 +1,37 @@
+apiVersion: connectors.aiops.ibm.com/v1beta1
+kind: BundleManifest
+metadata:
+  name: airgap-sample
+spec:
+  prereqs:
+    repo: 'https://connector-airgap.{{ .Namespace }}.svc/git/repo-name'
+    branch: master
+    authSecret:
+      name: connector-airgap-auth-secret
+    certSecret:
+      name: connector-airgap-cert-secret
+    components:
+      - name: deployment
+        path: /bundle-artifacts/prereqs
+        type: kustomize
+        kustomization:
+          images:
+            - name: replaceme
+              newName: image-registry.openshift-image-registry.svc:5000/namespace/image-name
+              newTag: unreleased-master-latest
+  instanced:
+    repo: 'https://connector-airgap.{{ .Namespace }}.svc/git/repo-name'
+    branch: master
+    authSecret:
+      name: connector-airgap-auth-secret
+    certSecret:
+      name: connector-airgap-cert-secret
+    components:
+      - name: connector
+        path: /bundle-artifacts/connector
+        type: kustomize
+        kustomization:
+          images:
+            - name: replaceme
+              newName: microedge-accessible-image-repo/image-name
+              newTag: unreleased-master-latest
