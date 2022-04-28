@@ -1,0 +1,7 @@
+nameReference:
+  - kind: Service
+    fieldSpecs:
+      - kind: Route
+        path: spec/to/name
+      - kind: Deployment
+        path: spec/template/spec/volumes/secret/secretName

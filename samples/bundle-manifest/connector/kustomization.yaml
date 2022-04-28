@@ -1,0 +1,36 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - deployment.yaml
+  - service.yaml
+  - serviceaccount.yaml
+  - route.yaml
+  - servicemonitor.yaml
+
+configurations:
+  - deploymentNameReference.yaml
+  - routeNameReference.yaml
+  - serviceNameReference.yaml
+  - varreference.yaml
+
+images:
+  - name: ibm-grpc-sample-connector
+    newName: hyc-cp4mcm-team-docker-local.artifactory.swg-devops.com/cp/aiopsedge/java-grpc-connector-template
+    newTag: unreleased-main-latest
+
+vars:
+  - name: SERVICE_NAME
+    objref:
+      kind: Service
+      name: ibm-grpc-sample-connector
+      apiVersion: v1
+    fieldref:
+      fieldpath: metadata.name
+  - name: SERVICE_NAMESPACE
+    objref:
+      kind: Service
+      name: ibm-grpc-sample-connector
+      apiVersion: v1
+    fieldref:
+      fieldpath: metadata.namespace

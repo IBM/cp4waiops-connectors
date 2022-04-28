@@ -1,0 +1,190 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ibm-grpc-sample-connector
+  labels:
+    app: ibm-grpc-sample-connector
+    connectors.aiops.ibm.com/restart-on-secret-changed: ""
+spec:
+  selector:
+    matchLabels:
+      app: ibm-grpc-sample-connector
+      instance: connector
+  template:
+    metadata:
+      labels:
+        app: ibm-grpc-sample-connector
+        instance: connector
+    spec:
+      imagePullSecrets:
+        - name: ibm-aiops-pull-secret
+      restartPolicy: Always
+      serviceAccountName: connector
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values:
+                      - amd64
+                      - ppc64le
+                  - key: kubernetes.io/os
+                    operator: In
+                    values:
+                      - linux
+      initContainers:
+        - image: ibm-grpc-sample-connector:unreleased-main-latest
+          imagePullPolicy: Always
+          name: cert-setup
+          command:
+            - "/opt/import-certs.sh"
+          resources:
+            requests:
+              cpu: 200m
+              memory: 300Mi
+              ephemeral-storage: "0"
+            limits:
+              cpu: 200m
+              memory: 500Mi
+              ephemeral-storage: 200Mi
+          volumeMounts:
+            - name: webhook
+              mountPath: /webhook
+            - name: server-certs
+              mountPath: /opt/cert
+            - name: config-overrides
+              mountPath: /config/configDropins/overrides/
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+      containers:
+        - image: ibm-grpc-sample-connector:unreleased-main-latest
+          imagePullPolicy: Always
+          name: ibm-grpc-sample-connector
+          envFrom:
+            - configMapRef:
+                name: route-info-configmap
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          ports:
+            - containerPort: 8080
+              name: webhook
+              protocol: TCP
+            - containerPort: 9443
+              name: metrics
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 200m
+              memory: 300Mi
+              ephemeral-storage: "0"
+            limits:
+              cpu: "1"
+              memory: 500Mi
+              ephemeral-storage: 200Mi
+          livenessProbe:
+            httpGet:
+              path: /h/live
+              port: 9443
+              scheme: HTTPS
+            initialDelaySeconds: 60
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /h/ready
+              port: 9443
+              scheme: HTTPS
+            initialDelaySeconds: 30
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 10
+            timeoutSeconds: 10
+          volumeMounts:
+            - name: webhook
+              mountPath: /webhook
+            - name: server-certs
+              mountPath: /opt/cert
+            - name: grpc-bridge-service-binding
+              mountPath: /bindings/grpc-bridge
+            - name: vault-binding
+              mountPath: /bindings/vault
+            - name: config-overrides
+              mountPath: /config/configDropins/overrides/
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+      hostNetwork: false
+      hostPID: false
+      hostIPC: false
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: webhook
+          secret:
+            secretName: ibm-grpc-sample-connector
+            defaultMode: 420
+        - name: server-certs
+          emptyDir: {}
+        - name: config-overrides
+          emptyDir: {}
+        - name: grpc-bridge-service-binding
+          projected:
+            sources:
+              - secret:
+                  name: connector-bridge-connection-info
+                  items:
+                    - key: ca.crt
+                      path: ca.crt
+                    - key: tls.crt
+                      path: tls.crt
+                    - key: tls.key
+                      path: tls.key
+                    - key: host
+                      path: host
+                    - key: port
+                      path: port
+              - secret:
+                  name: connector
+                  items:
+                    - key: id
+                      path: id
+                    - key: client-id
+                      path: client-id
+                    - key: client-secret
+                      path: client-secret
+        - name: vault-binding
+          projected:
+            sources:
+              - secret:
+                  name: vault-connection-info
+                  items:
+                    - key: ca.crt
+                      path: ca.crt
+                    - key: host
+                      path: host
+                    - key: token
+                      path: token
+                    - key: port
+                      path: port
+                  optional: true
