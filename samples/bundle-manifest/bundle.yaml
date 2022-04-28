@@ -1,0 +1,33 @@
+apiVersion: connectors.aiops.ibm.com/v1beta1
+kind: BundleManifest
+metadata:
+  name: sample
+spec:
+  prereqs:
+    repo: 'https://github.ibm.com/katamari/cp4waiops-connector-sdk-playbook'
+    branch: main
+    authSecret:
+      name: test-utilities-github-token
+    components:
+      - name: deployment
+        path: /bundle-artifacts/prereqs
+        type: kustomize
+        kustomization:
+          images:
+            - name: ibm-grpc-sample-connector
+              newName: hyc-cp4mcm-team-docker-local.artifactory.swg-devops.com/cp/aiopsedge/java-grpc-connector-template
+              newTag: unreleased-main-latest
+  instanced:
+    repo: 'https://github.ibm.com/katamari/cp4waiops-connector-sdk-playbook'
+    branch: main
+    authSecret:
+      name: test-utilities-github-token
+    components:
+      - name: connector
+        path: /bundle-artifacts/connector
+        type: kustomize
+        kustomization:
+          images:
+            - name: ibm-grpc-sample-connector
+              newName: hyc-cp4mcm-team-docker-local.artifactory.swg-devops.com/cp/aiopsedge/java-grpc-connector-template
+              newTag: unreleased-main-latest

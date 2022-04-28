@@ -1,0 +1,22 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ibm-grpc-sample-connector
+  labels:
+    app: ibm-grpc-sample-connector
+spec:
+  endpoints:
+  - port: metrics
+    path: /h/metrics
+    scheme: https
+    tlsConfig:
+      serverName: "$(SERVICE_NAME).$(SERVICE_NAMESPACE).svc"
+      ca:
+        configMap:
+          name: aiopsedge-openshift-ca-cert
+          key: service-ca.crt
+          optional: false
+  selector:
+    matchLabels:
+      app: ibm-grpc-sample-connector
+      instance: connector

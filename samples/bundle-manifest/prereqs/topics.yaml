@@ -1,0 +1,14 @@
+---
+apiVersion: connectors.aiops.ibm.com/v1beta1
+kind: AIOpsKafkaTopic
+metadata:
+  name: cp4waiops-cartridge.custom-topic-a
+spec:
+  topicName: cp4waiops-cartridge.custom-topic-a
+---
+apiVersion: connectors.aiops.ibm.com/v1beta1
+kind: AIOpsKafkaTopic
+metadata:
+  name: cp4waiops-cartridge.custom-topic-b
+spec:
+  topicName: cp4waiops-cartridge.custom-topic-b

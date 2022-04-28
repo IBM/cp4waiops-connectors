@@ -1,0 +1,15 @@
+nameReference:
+  - kind: ServiceAccount
+    fieldSpecs:
+      - kind: Deployment
+        path: spec/template/spec/volumes/projected/sources/secret/name
+      - kind: Deployment
+        path: spec/selector/matchLabels/instance
+      - kind: Deployment
+        path: spec/template/metadata/labels/instance
+      - kind: Service
+        path: metadata/labels/instance
+      - kind: Service
+        path: spec/selector/instance
+      - kind: ServiceMonitor
+        path: spec/selector/matchLabels/instance

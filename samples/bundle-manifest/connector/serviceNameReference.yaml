@@ -1,0 +1,5 @@
+nameReference:
+  - kind: Deployment
+    fieldSpecs:
+      - kind: Service
+        path: 'metadata/annotations/service.beta.openshift.io\/serving-cert-secret-name'
