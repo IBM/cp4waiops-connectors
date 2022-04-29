@@ -4,6 +4,7 @@ ARG REPO
 ARG EMAIL
 ARG USERNAME
 ARG BUNDLE_ARTIFACTS_DIR
+ARG COMMIT_MESSAGE
 
 # Install Dependencies
 RUN microdnf install httpd httpd-tools mod_ssl git -y && \
@@ -40,7 +41,9 @@ COPY --chown=1000:1000 $BUNDLE_ARTIFACTS_DIR/ /srv/git/$REPO/
 RUN cd /srv/git/$REPO && \
     git init && \
     git config user.email "$EMAIL" && \
-    git config user.name "$USERNAME"
+    git config user.name "$USERNAME" && \
+    git add . && \
+    git commit -m $COMMIT_MESSAGE
 
 # Run the server
 ENTRYPOINT ["/usr/sbin/httpd", "-DFOREGROUND"]
