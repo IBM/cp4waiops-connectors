@@ -43,7 +43,7 @@ RUN cd /srv/git/$REPO && \
     git config user.email "$EMAIL" && \
     git config user.name "$USERNAME" && \
     git add . && \
-    git commit -m $COMMIT_MESSAGE
+    git commit -m "$COMMIT_MESSAGE"
 
 # Run the server
 ENTRYPOINT ["/usr/sbin/httpd", "-DFOREGROUND"]
