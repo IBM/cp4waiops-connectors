@@ -35,7 +35,7 @@ COPY --chown=1000:1000 httpd.conf /etc/httpd/conf/
 COPY --chown=1000:1000 git-server.conf /etc/httpd/conf.d/
 
 # Copy All Manifests and Directory Structures
-COPY --chown=1000:1000 $BUNDLE_ARTIFACTS_DIR/ /srv/git/$REPO/
+COPY --chown=1000:1000 $BUNDLE_ARTIFACTS_DIR/ /srv/git/$REPO/$BUNDLE_ARTIFACTS_DIR
 
 # Initialize the repo
 RUN cd /srv/git/$REPO && \
