@@ -20,5 +20,5 @@ deploy: get-helm
 	helm upgrade --install ${RELEASE_NAME} deploy/connector-airgap
 
 .PHONY: uninstall
-uninstall:
+uninstall: get-helm
 	helm uninstall ${RELEASE_NAME}
