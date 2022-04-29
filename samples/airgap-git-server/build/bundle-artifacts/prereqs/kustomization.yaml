@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+configurations:
+  - custom-images.yaml
+
+resources:
+  - schema.yaml
+  - microedgeconfiguration.yaml
+  - topics.yaml
+
+images:
+- name: ibm-grpc-sample-connector
+  newName: hyc-cp4mcm-team-docker-local.artifactory.swg-devops.com/cp/aiopsedge/java-grpc-connector-template
+  newTag: unreleased-main-latest

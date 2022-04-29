@@ -1,0 +1,129 @@
+apiVersion: connectors.aiops.ibm.com/v1beta1
+kind: ConnectorSchema
+metadata:
+  name: sample
+spec:
+  categories:
+    - events
+  ceType: com.ibm.aiops.connectors.configuration
+  components:
+    - apiType: AsyncAPI
+      name: connector
+  documentation: https://github.ibm.com/quicksilver/cp4waiops-grpc-templates/blob/master/open-liberty/README.md
+  schema:
+    additionalProperties: false
+    oneOf:
+      - required:
+          - cpuThreshold
+          - severityLevel
+          - expirySeconds
+          - enableCPUHeavyWorkload
+    properties:
+      cpuThreshold:
+        type: integer
+        description: Target CPU for Threshold
+        default: 80
+      severityLevel:
+        type: integer
+        description: Severity level of events to emit (1-6)
+        default: 6
+      expirySeconds:
+        type: integer
+        description: Amount of time in seconds before the event is dismissed
+        default: 30
+      enableCPUHeavyWorkload:
+        type: boolean
+        description: Starts or stops a cpu intensive task
+        default: true
+    type: object
+  uiSchema:
+    type: java-grpc-connector-template
+    displayName: "Java gRPC Connector Template"
+    iconFileType: png
+    categories:
+      - "{{connector.common.category.events}}"
+    url: https://ibm.biz/int-github
+    isObserver: false
+    apiAdaptor: connection
+    datasourceType: events
+    sidePanelTitle: "Java gRPC Connector Template"
+    sidePanelDescription: "A sample template that submits events to the Connector Lifecycle Event Manager"
+    sidePanelInfoHeader: "Information"
+    sidePanelInfo:
+      - "TODO"
+    hasOptionalConfig: false
+    hasOptionalText: false
+    hasAIModelType: false
+    formSteps:
+      - step:
+          id: addConnection
+          name: "{{formSteps.addConnection}}"
+    form:
+      - id: name
+        element: input
+        type: text
+        label: "{{connector.common.form.uniqueID.label}}"
+        placeholder: "{{connector.common.form.ops_integration_name.placeholder}}"
+        apiMapping: connection_config.display_name
+        formStep: addConnection
+        isRequired: true
+      - id: cpuThreshold
+        element: input
+        type: number
+        label: "CPU Usage Threshold"
+        placeholder: "80"
+        min: 1
+        max: 2147483647
+        step: 1
+        defaultValue: 80
+        helperText: "Specify the cpu usage threshold. The default is 80"
+        apiMapping: connection_config.cpuThreshold
+        formStep: addConnection
+        isRequired: true
+      - id: severityLevel
+        element: input
+        type: number
+        label: "Event Severity Level"
+        placeholder: "6"
+        min: 1
+        max: 6
+        step: 1
+        defaultValue: 6
+        helperText: "Specify the event severity level. The higher the value, the higher the severity. The default is 6."
+        apiMapping: connection_config.severityLevel
+        formStep: addConnection
+        isRequired: true
+      - id: expirySeconds
+        element: input
+        type: number
+        label: "Event Lifetime (s)"
+        placeholder: "80"
+        min: 1
+        max: 2147483647
+        step: 1
+        defaultValue: 30
+        helperText: "Specify the seconds to elapse before dismissing the event automatically. The default is 30."
+        apiMapping: connection_config.expirySeconds
+        formStep: addConnection
+        isRequired: true
+      - id: enableCPUHeavyWorkload
+        element: input
+        type: toggle
+        defaultToggled: true
+        label: "Enable workload with high CPU usage"
+        labelOff: "{{common.Off}}"
+        labelOn: "{{common.On}}"
+        apiMapping: connection_config.enableCPUHeavyWorkload
+        formStep: addConnection
+      - apiMapping: connection_config.deploymentType
+        element: input
+        formStep: addConnection
+        id: orchestration
+        itemKeys:
+          - local
+          - microedge
+        items:
+          - '{{connection_form.dynamic_item.local}}'
+          - '{{connection_form.dynamic_item.remote}}'
+        label: '{{connector.common.form.orchestration.label}}'
+        type: radio

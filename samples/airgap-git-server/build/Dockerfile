@@ -1,5 +1,10 @@
 FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
 
+ARG REPO
+ARG EMAIL
+ARG USERNAME
+ARG BUNDLE_ARTIFACTS_DIR
+
 # Install Dependencies
 RUN microdnf install httpd httpd-tools mod_ssl git -y && \
   # Remove default ssl config
@@ -29,13 +34,13 @@ COPY --chown=1000:1000 httpd.conf /etc/httpd/conf/
 COPY --chown=1000:1000 git-server.conf /etc/httpd/conf.d/
 
 # Copy All Manifests and Directory Structures
-COPY --chown=1000:1000 ./ /srv/git/repo-name/
+COPY --chown=1000:1000 $BUNDLE_ARTIFACTS_DIR/ /srv/git/$REPO/
 
 # Initialize the repo
-RUN cd /srv/git/repo-name && \
+RUN cd /srv/git/$REPO && \
     git init && \
-    git config user.email "replaceme@replaceme.com" && \
-    git config user.name "replaceme"
+    git config user.email "$EMAIL" && \
+    git config user.name "$USERNAME"
 
 # Run the server
 ENTRYPOINT ["/usr/sbin/httpd", "-DFOREGROUND"]
