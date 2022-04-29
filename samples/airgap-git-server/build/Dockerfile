@@ -21,6 +21,7 @@ RUN microdnf install httpd httpd-tools mod_ssl git -y && \
   mkdir /conf && \
   # Permissions
   chmod ugo+rwx /srv/git && \
+  chmod ugo+rwx /srv/git/$REPO && \
   chmod ugo+rwx /conf && \
   chmod ugo+rwx /run/httpd && \
   chmod ugo+rwx /etc/httpd && \
