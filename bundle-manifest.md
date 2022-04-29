@@ -142,3 +142,9 @@ managed by a k8s deployment. The label `connectors.aiops.ibm.com/restart-on-secr
 deployment, which will result in the following behavior. The label triggers a new deployment rollout when it is 
 detected that the secrets a deployment references have changed. The logic will detect secrets that have been mounted 
 as a secret-volume or projected-volume, or are referenced from the env section of any of the container specs.
+
+## Use in Air-Gapped Clusters
+In some cases you may wish to deploy your connector in an air-gapped environment (one which is isolated from the public 
+internet). In this case your environment may be unable to communicate with Github or any other public Git repository 
+hosting service. If this is the case then you may need to host a git repository service containing your deployment 
+manifests within the cluster. # TODO
