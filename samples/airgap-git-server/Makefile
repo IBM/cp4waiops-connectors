@@ -5,7 +5,7 @@ endif
 
 .PHONY: build
 build:
-	docker build build/ -t ${DOCKER_IMAGE_NAME} --pull --build-arg REPO=${REPO} --build-arg EMAIL=${EMAIL} --build-arg USERNAME=${USERNAME} --build-arg BUNDLE_ARTIFACTS_DIR=${BUNDLE_ARTIFACTS_DIR} --build-arg COMMIT_MESSAGE=${COMMIT_MESSAGE}
+	docker build build/ -t ${DOCKER_IMAGE_NAME} --pull --build-arg REPO=${REPO} --build-arg EMAIL=${EMAIL} --build-arg USERNAME=${USERNAME} --build-arg BUNDLE_ARTIFACTS_DIR=${BUNDLE_ARTIFACTS_DIR} --build-arg COMMIT_MESSAGE="${COMMIT_MESSAGE}"
 
 .PHONY: push
 push:
