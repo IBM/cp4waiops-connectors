@@ -90,7 +90,10 @@ spec:
         - mountPath: /etc/httpd/run
           name: run
       dnsPolicy: ClusterFirst
-      imagePullSecrets: {{ .Values.GitServer.imagePullSecrets | toYaml }}
+      {{- with .Values.GitServer.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       initContainers:
       - args:
         - -c
