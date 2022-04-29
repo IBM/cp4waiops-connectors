@@ -19,5 +19,11 @@ Bundles:
     # Image locations, not including tag or digest, "local" must be pullable from the cluster and "microedge" must be
     # pullable from wherever microedge deployment may be desired
     images:
-      local: replaceme # e.g. image-registry.openshift-image-registry.svc:5000/namespace/ibm-grpc-sample-connector
-      microedge: replaceme # e.g. image-registry-openshift-image-registry.apps.mycluster.com/namespace/ibm-grpc-sample-connector
+      local:
+        - name: replaceme # e.g ibm-grpc-sample-connector
+          newName: replaceme # e.g. image-registry.openshift-image-registry.svc:5000/namespace/ibm-grpc-sample-connector
+          newTag: replaceme # e.g. unreleased-main-latest
+      microedge:
+        - name: replaceme # e.g ibm-grpc-sample-connector
+          newName: replaceme # e.g. image-registry-openshift-image-registry.apps.mycluster.com/namespace/ibm-grpc-sample-connector
+          newTag: replaceme # e.g. unreleased-main-latest
