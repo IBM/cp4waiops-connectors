@@ -147,4 +147,4 @@ as a secret-volume or projected-volume, or are referenced from the env section o
 In some cases you may wish to deploy your connector in an air-gapped environment (one which is isolated from the public 
 internet). In this case your environment may be unable to communicate with Github or any other public Git repository 
 hosting service. If this is the case then you may need to host a git repository service containing your deployment 
-manifests within the cluster. # TODO
+manifests within the cluster. For an example of how to do this, see the provided [sample](/samples/airgap-git-server).
