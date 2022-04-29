@@ -17,7 +17,7 @@ RUN microdnf install httpd httpd-tools mod_ssl git -y && \
     /usr/share/doc/perl-IO-Socket-SSL/certs/server-key.pem \
     /usr/share/doc/perl-IO-Socket-SSL/certs/server2-key.pem \
     /usr/share/doc/perl-Net-SSLeay/examples/server_key.pem && \
-  mkdir -p /srv/git && \
+  mkdir -p /srv/git/$REPO && \
   mkdir /conf && \
   # Permissions
   chmod ugo+rwx /srv/git && \
@@ -35,7 +35,6 @@ COPY --chown=1000:1000 httpd.conf /etc/httpd/conf/
 COPY --chown=1000:1000 git-server.conf /etc/httpd/conf.d/
 
 # Copy All Manifests and Directory Structures
-RUN mkdir -p /srv/git/$REPO/
 COPY --chown=1000:1000 $BUNDLE_ARTIFACTS_DIR/ /srv/git/$REPO/$BUNDLE_ARTIFACTS_DIR/
 
 # Initialize the repo
