@@ -1,0 +1,7 @@
+GitServer:
+  username: replaceme
+  password: replaceme
+  repo: replaceme
+  image: replaceme
+  imagePullSecrets:
+    - name: replaceme

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="KubernetesSettings">
+    <specSources>
+      <SpecSource>
+        <option name="pathOrUrl" value="$USER_HOME$/AIOpsEdge-Operator/bundle/manifests/connectors.aiops.ibm.com_bundlemanifests.yaml" />
+      </SpecSource>
+    </specSources>
+  </component>
+</project>

@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: connector-airgap
+  name: {{ .Release.Name }}
 spec:
   progressDeadlineSeconds: 600
   replicas: 1
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      app: connector-airgap
+      app: {{ .Release.Name }}
   strategy:
     rollingUpdate:
       maxSurge: 25%
@@ -17,7 +17,7 @@ spec:
   template:
     metadata:
       labels:
-        app: connector-airgap
+        app: {{ .Release.Name }}
     spec:
       affinity:
         nodeAffinity:
@@ -30,7 +30,7 @@ spec:
                 - amd64
                 - ppc64le
       containers:
-      - image: replaceme
+      - image: {{ .Values.GitServer.image }}
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 3
@@ -90,8 +90,7 @@ spec:
         - mountPath: /etc/httpd/run
           name: run
       dnsPolicy: ClusterFirst
-      imagePullSecrets:
-      - name: replaceme
+      imagePullSecrets: {{ .Values.GitServer.imagePullSecrets | toYaml }}
       initContainers:
       - args:
         - -c
@@ -100,8 +99,8 @@ spec:
         - bash
         envFrom:
         - secretRef:
-            name: connector-airgap-auth-secret
-        image: replaceme
+            name: {{ .Release.Name }}-auth-secret
+        image: {{ .Values.GitServer.image }}
         imagePullPolicy: Always
         name: gen-htpasswd
         resources:
@@ -131,19 +130,19 @@ spec:
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
-      serviceAccountName: connector-airgap
+      serviceAccountName: {{ .Release.Name }}
       terminationGracePeriodSeconds: 30
       volumes:
       - emptyDir: {}
         name: pass
       - configMap:
           defaultMode: 420
-          name: connector-airgap-server-config
+          name: {{ .Release.Name }}-server-config
         name: cm
       - name: certs
         secret:
           defaultMode: 420
-          secretName: connector-airgap-cert-secret
+          secretName: {{ .Release.Name }}-cert-secret
       - emptyDir: {}
         name: tmp
       - emptyDir: {}
