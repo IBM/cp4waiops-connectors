@@ -148,3 +148,9 @@ In some cases you may wish to deploy your connector in an air-gapped environment
 internet). In this case your environment may be unable to communicate with Github or any other public Git repository 
 hosting service. If this is the case then you may need to host a git repository service containing your deployment 
 manifests within the cluster. For an example of how to do this, see the provided [sample](/samples/airgap-git-server).
+In order to use the sample you must fill out the [build-args](/samples/airgap-git-server/build-args.env) file to 
+configure the image build (which requires docker). You must also fill out the 
+[values file](/samples/airgap-git-server/deploy/connector-airgap/values.yaml) for the 
+[helm chart](/samples/airgap-git-server/deploy/connector-airgap) to configure deployment of the git-server and any 
+BundleManifests that will be deployed using it. You may then use the provided 
+[make targets](/samples/airgap-git-server/Makefile) to build and deploy the git-server to your cluster.
