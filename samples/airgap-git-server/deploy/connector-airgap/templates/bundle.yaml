@@ -1,37 +1,40 @@
+{{ $root := . }}
+{{- range $Bundle := $root.Values.Bundles }}
 apiVersion: connectors.aiops.ibm.com/v1beta1
 kind: BundleManifest
 metadata:
-  name: airgap-sample # TODO
+  name: {{ $Bundle.name }}
 spec:
   prereqs:
-    repo: 'https://{{ .Release.Name }}.{{ .Release.Namespace }}.svc/git/{{ .Values.GitServer.repo }}'
+    repo: 'https://{{ $root.Release.Name }}.{{ $root.Release.Namespace }}.svc/git/{{ $root.Values.GitServer.repo }}'
     branch: master
     authSecret:
-      name: {{ .Release.Name }}-auth-secret
+      name: {{ $root.Release.Name }}-auth-secret
     certSecret:
-      name: {{ .Release.Name }}-cert-secret
+      name: {{ $root.Release.Name }}-cert-secret
     components:
       - name: deployment
-        path: /bundle-artifacts/prereqs # TODO
+        path: {{ $Bundle.paths.prereqs }}
         type: kustomize
         kustomization:
           images:
-            - name: replaceme # TODO
-              newName: image-registry.openshift-image-registry.svc:5000/namespace/image-name # TODO
-              newTag: unreleased-master-latest # TODO
+            - name: ibm-grpc-sample-connector
+              newName: {{ $Bundle.images.microedge }}
+              newTag: unreleased-main-latest
   instanced:
-    repo: 'https://{{ .Release.Name }}.{{ .Release.Namespace }}.svc/git/{{ .Values.GitServer.repo }}'
+    repo: 'https://{{ $root.Release.Name }}.{{ $root.Release.Namespace }}.svc/git/{{ $root.Values.GitServer.repo }}'
     branch: master
     authSecret:
-      name: {{ .Release.Name }}-auth-secret
+      name: {{ $root.Release.Name }}-auth-secret
     certSecret:
-      name: {{ .Release.Name }}-cert-secret
+      name: {{ $root.Release.Name }}-cert-secret
     components:
       - name: connector
-        path: /bundle-artifacts/connector # TODO
+        path: {{ $Bundle.paths.instanced }}
         type: kustomize
         kustomization:
           images:
-            - name: replaceme # TODO
-              newName: microedge-accessible-image-repo/image-name # TODO
-              newTag: unreleased-master-latest # TODO
+            - name: ibm-grpc-sample-connector
+              newName: {{ $Bundle.images.local }}
+              newTag: unreleased-main-latest
+{{- end }}

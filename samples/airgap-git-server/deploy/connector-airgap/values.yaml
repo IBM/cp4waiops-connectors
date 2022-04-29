@@ -1,7 +1,23 @@
 GitServer:
+  # Username and password that CP4WAIOps will use to authenticate with the server
   username: replaceme
   password: replaceme
+  # The name of the repo, should match setting in build-args.env
   repo: replaceme
+  # The name of the Git-Server image, should match setting in build-args.env, and must be pullable from the environment
+  # e.g. image-registry.openshift-image-registry.svc:5000/namespace/airgap-server
   image: replaceme
   imagePullSecrets:
     - name: replaceme
+# Details of connector bundles being deployed via this GitServer
+Bundles:
+  - name: airgap-sample # Name of the connector
+    # Locations of the bundles artifacts for prereqs and instance for this connector
+    paths:
+      prereqs: /bundle-artifacts/prereqs
+      instanced: /bundle-artifacts/connector
+    # Image locations, not including tag or digest, "local" must be pullable from the cluster and "microedge" must be
+    # pullable from wherever microedge deployment may be desired
+    images:
+      local: replaceme # e.g. image-registry.openshift-image-registry.svc:5000/namespace/ibm-grpc-sample-connector
+      microedge: replaceme # e.g. image-registry-openshift-image-registry.apps.mycluster.com/namespace/ibm-grpc-sample-connector
