@@ -46,3 +46,12 @@ the Kubernetes service that the connector needs access to. The service may also 
 its permissions via use of additional headers that will automatically be added to the request by the connector-bridge
 server. These headers are `Client-ID`, `Client-Secret`, and `Authentication` which will include an OIDC Bearer token 
 generated automatically using the connector's Client-ID and Client-Secret.
+
+## Credential Encryption
+In many cases a ConnectorConfiguration will include a set of credentials used to interact with the target technology.
+If these credentials are provided directly (as opposed to being accessed via Hashicorp Vault) then you need to provide
+configuration to inform the server of which fields of your ConnectorConfiguration need to be encrypted at rest. This 
+should be done by configuring the `.spec.encryptedFields` field of the ConnectorSchema with an array of 
+[JSON-Pointers](https://tools.ietf.org/html/rfc6901) pointing to the fields within the ConnectorConfiguration's 
+`.spec.config` that should be stored as encrypted values. The values are stored using an AES-GCM encryption scheme and 
+will be decrypted by the connector-bridge prior to sending   the configurations to the connector.
