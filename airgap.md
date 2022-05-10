@@ -9,14 +9,10 @@ You may wish to deploy your custom connector in an air-gapped environment (one w
 `yum install -y skopeo`
 - Access to the Red Hat OpenShift Container Platform cluster as a user with the `cluster-admin` role.
 
-## Create the gitserver
-Follow the instructions for [creating the Git Server](/bundle-manifest.md#use-in-air-gapped-clusters)
-
-
 ## Configure the registry mirror
 Create a new `ImageContentSourcePolicy` on your Red Hat OpenShift cluster to enable the redirection of requests to pull images from a repository on a mirrored image registry.
 
-Replace `<image>/<name>` with the proper name and `<example.io/subdir>` with your internal image registry repository, then run the command on the inf node of your Red Hat OpenShift cluster:
+Replace `<subdir>` with the proper name and `<example.io/subdir>` with your internal image registry repository, then run the command on the inf node of your Red Hat OpenShift cluster:
 
 ```
 oc create -f - << EOF
@@ -28,7 +24,7 @@ spec:
 repositoryDigestMirrors:
 - mirrors:
     - <example.io/subdir>
-    source: cp.icr.io/cp/<image>/<name>
+    source: cp.icr.io/cp/<subdir>
 - mirrors:
     - example.io/subdir
     source: icr.io/cpopen
@@ -61,7 +57,7 @@ unqualified-search-registries = ["registry.access.redhat.com", "docker.io"]
 
 [[registry]]
 prefix = ""
-location = "cp.icr.io/cp/<image>/<name>"
+location = "cp.icr.io/cp/<subdir>"
 mirror-by-digest-only = true
 
 [[registry.mirror]]
@@ -78,8 +74,11 @@ mirror-by-digest-only = true
 
 Note: Further RedHat Documentation [here](https://access.redhat.com/documentation/en-us/openshift_container_platform/4.6/html/updating_clusters/updating-restricted-network-cluster)
 
+## Create the gitserver
+Follow the instructions for [creating the Git Server](/bundle-manifest.md#use-in-air-gapped-clusters)
+
 ## Copying images from source to target internal image registry
-We outlined the steps to configure the cluster to redirect external image registry requests to an internal registry through the ImageContentSourcePolicy. Now we must populate the internal registry with the images from the source image registry.
+We outlined the steps to configure the cluster to redirect external image registry requests to an internal registry through the ImageContentSourcePolicy and the steps to set up the Git Server. Now we must populate the internal registry with the images from the source image registry.
 
 Complete the following steps from the online node:
 
@@ -92,10 +91,11 @@ skopeo login cp.icr.io
 skopeo login example.io
 ```
 
-3. Use skopeo copy to copy the following images from the IBM Entitled Container Registry to your internal production grade image registry. Replace the <variables> so that the first image points to the source image registry and the second points to the internal image registry.
+3. Use `skopeo copy` to copy your custom connector image and gitserver image from the IBM Entitled Container Registry to your internal production grade image registry. Replace the <variables> in the command below where the first image points to the source image registry and the second points to the internal image registry.
+
 
 ```
-skopeo copy --all docker://cp.icr.io/cp/<image>/<name>/<image>@sha256:<digest> docker://example.io/subdir/<image>@sha256:<digest>
+skopeo copy --all docker://cp.icr.io/cp/<subdir>/<image>@sha256:<digest> docker://<example.io>/<subdir>/<image>@sha256:<digest>
 ```
 
 ## Verify pulling images from the mirrored registry
@@ -128,8 +128,8 @@ Login Succeeded!
 4. Attempt to pull one of the images from the source image registry.
 
 ```
-$ podman pull cp.icr.io/cp/<image>/<name>/<image>@sha256:<digest>
-Trying to pull cp.icr.io/cp/<image>/<name>/<image>@sha256:<digest>...
+$ podman pull cp.icr.io/cp/<subdir>/<image>@sha256:<digest>
+Trying to pull cp.icr.io/cp/<subdir>/<image>@sha256:<digest>...
 Getting image source signatures
 
 Copying blob ...
@@ -140,8 +140,8 @@ Storing signatures
 5. Verify that the image is pulled.
 
 ```
-$ podman images | grep cp.icr.io/cp/<image>/<name>/<image>
-cp.icr.io/cp/<image>/<name>/<image>    <none>     <digest>   22 hours ago    58 MB
+$ podman images | grep cp.icr.io/cp/<subdir>/<image>
+cp.icr.io/cp/<subdir>/<image>    <none>     <digest>   22 hours ago    58 MB
 ```
 
 ## Red Hat OpenShift Container Registry pull secret
