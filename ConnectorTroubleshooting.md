@@ -157,10 +157,12 @@ or that there is a problem with [user workload monitoring](https://docs.openshif
 
 Some example PromQL queries for a connector with id `dabc7a3f-9c44-4505-8890-58907297cd7b`:
 ```
-sum by (channel_name)(irate(connector_sdk_produce_sent_total{connector_id="dabc7a3f-9c44-4505-8890-58907297cd7b"}[1m]) * 60)
+sum by (channel_name)(irate(connector_sdk_produce_sent_total{connector_id="dabc7a3f-9c44-4505-8890-58907297cd7b"}[1m]) * 30)
 ```
 
 ```
-sum by (channel_name)(irate(connector_sdk_produce_verified_total{connector_id="dabc7a3f-9c44-4505-8890-58907297cd7b"}[1m]) * 60)
+sum by (channel_name)(irate(connector_sdk_produce_verified_total{connector_id="dabc7a3f-9c44-4505-8890-58907297cd7b"}[1m]) * 30)
 ```
+
+Note: the above queries assume prometheus was configured with a scrape inverval of 30 seconds.
 
