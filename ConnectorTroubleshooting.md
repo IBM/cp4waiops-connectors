@@ -45,6 +45,34 @@ bundles.
 
 The following sections address communication errors that users may run into.
 
+### Connector Component has Unknown Status
+
+If the component phase is Unknown and the reason given is that a Cloud Event was not acknowledged,
+this would indicate that status updates are not being received.
+
+```
+status:
+  components:
+    connector:
+      observedGeneration: 1
+      phase: Unknown
+      requeueAfter: 30000000000
+      resources:
+        error: >-
+          Post "https://connector-bridge.cp4waiops.svc:9443/v1/async": context
+          deadline exceeded
+        reason: >-
+          https://connector-bridge.cp4waiops.svc:9443/v1/async did not
+          acknowledge Cloud Event
+        summary: >-
+          unable to determine status of Connector component, connection may have
+          been interrupted
+```
+
+Verify that the connector is actually running, either remotely or locally. If it is, and the logs show
+it is healthy, verify that the connector has code to periodically resend its status at least once every
+5 minutes.
+
 ### TLS Errors
 
 The following exception indicates that the connector was unable to validate the server certificate.
