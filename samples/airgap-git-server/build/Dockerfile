@@ -34,6 +34,7 @@ USER 1000
 # Copy Config Files
 COPY --chown=1000:1000 httpd.conf /etc/httpd/conf/
 COPY --chown=1000:1000 git-server.conf /etc/httpd/conf.d/
+COPY liveness.sh /usr/local/bin/liveness
 
 # Copy All Manifests and Directory Structures
 COPY --chown=1000:1000 $BUNDLE_ARTIFACTS_DIR/ /srv/git/$REPO/$BUNDLE_ARTIFACTS_DIR/
