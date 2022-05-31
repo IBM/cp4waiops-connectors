@@ -55,3 +55,15 @@ should be done by configuring the `.spec.encryptedFields` field of the Connector
 [JSON-Pointers](https://tools.ietf.org/html/rfc6901) pointing to the fields within the ConnectorConfiguration's 
 `.spec.config` that should be stored as encrypted values. The values are stored using an AES-GCM encryption scheme and 
 will be decrypted by the connector-bridge prior to sending   the configurations to the connector.
+
+### Example
+```yaml
+spec:
+  encryptedFields:
+    - /password
+  schema:
+    type: object
+    properties:
+      password: 
+        type: string
+```
