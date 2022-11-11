@@ -1,0 +1,13 @@
+{
+   "connectionid":"011eec67-54a3-4909-8050-16e89dc91eb7",
+   "componentname":"connector",
+   "live":"false",
+   "reqid":"1872bb06-1565-48d0-b9a0-1506aa867c8e",
+   "patterns":[
+      "^example-.*"
+   ],
+   "target":"example-test1",
+   "test":true,
+   "uri":"https://github.com",
+   "token":"notarealtoken"
+}

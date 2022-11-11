@@ -1,0 +1,7 @@
+{
+    "patterns":["^IBM/cp4waiops-connectors-java-template.*"],
+     "token": "WRONGTOKEN",
+     "target": "IBM/cp4waiops-connectors-java-template",
+     "uri": "https://github.com",
+     "live": true
+ }

@@ -1,0 +1,27 @@
+{
+   "specversion":"1.0",
+   "id":"1872bb06-1565-48d0-b9a0-1506aa867c8e-2021-11-05 13:09:36.429184991 +0000 UTC m=+165945.496662077",
+   "source":"/apis/connectors.aiops.ibm.com/v1beta1/namespaces/aiopsedge/aiopsedges/connectorconfiguration-sam-connector-011eec67",
+   "type":"com.ibm.sdlc.connection.create",
+   "datacontenttype":"application/json",
+   "time":"2021-11-05T13:09:36.429184991Z",
+   "mode":"job",
+   "method":"POST",
+   "connectortype":"github",
+   "integration":"scm-handlers",
+   "host":"https://connector-bridge.aiopsedge.svc:9443/v1/async",
+   "ignore":"target",
+   "connectionid":"011eec67-54a3-4909-8050-16e89dc91eb7",
+   "componentname":"connector",
+   "live":"false",
+   "reqid":"1872bb06-1565-48d0-b9a0-1506aa867c8e",
+   "data":{
+      "patterns":[
+         "^example-.*"
+      ],
+      "target":"example-test1",
+      "test":true,
+      "uri":"https://github.com",
+      "token":"notarealtoken"
+   }
+}

@@ -1,0 +1,9 @@
+apiVersion: connectors.aiops.ibm.com/v1beta1
+kind: ConnectorConfiguration
+metadata:
+  name: example-template-connector
+spec:
+  config:
+    uri: 'https://www.ibm.com'
+  deploymentType: microedge
+  type: connector-template

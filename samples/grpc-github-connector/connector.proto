@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package com.ibm.aiops.connectors.bridge;
+import "google/protobuf/empty.proto";
+import "spec.proto";
+
+option java_multiple_files = true;
+
+message ConnectorStatus {
+  string connectionid = 1;
+  string componentname = 2;
+  string reqId = 3;
+
+  enum Phase {
+    Unknown = 0;
+    Accepted = 1;
+    Retrying = 2;
+    Running = 3;
+    Done = 4;
+    Initializing = 5;
+    Terminating = 6;
+    Deleted = 7;
+    Errored = 8;
+    Disabled = 9;
+    Disabling = 10;
+  }
+  Phase phase = 4;
+  map<string, string> resources = 5;
+  int64 requeueAfter = 6;
+}
+
+// Connector Bridge Service
+service ConnectorBridge {
+  rpc Produce(stream io.cloudevents.v1.CloudEvent) returns(io.cloudevents.v1.CloudEvent) {}
+  rpc ProduceSync(stream io.cloudevents.v1.CloudEvent) returns(stream io.cloudevents.v1.CloudEvent) {}
+  rpc Consume(io.cloudevents.v1.CloudEvent) returns(stream io.cloudevents.v1.CloudEvent) {}
+  rpc OpenAPIRequest (io.cloudevents.v1.CloudEvent) returns(io.cloudevents.v1.CloudEvent) {}
+  rpc Configuration(io.cloudevents.v1.CloudEvent) returns(stream io.cloudevents.v1.CloudEvent) {}
+  rpc Status(ConnectorStatus) returns(io.cloudevents.v1.CloudEvent) {}
+}
+
