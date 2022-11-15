@@ -1,0 +1,20 @@
+{
+   "specversion": "1.0",
+   "id": "e82e99ca-827a-4ec1-b0c2-3ae78e16781a.6",
+   "source": "/apis/connectors.aiops.ibm.com/v1beta1/namespaces/cp4waiops/aiopsedges/templates-connector-21e66e3f",
+   "type": "com.ibm.watson.aiops.connectors.template.configuration",
+   "datacontenttype": "application/json",
+   "subject": "templates-connector-21e66e3f",
+   "time": "2022-01-28T21:28:56.336942297Z",
+   "method": "POST",
+   "connectortype": "github",
+   "host": "https://connector-bridge.cp4waiops.svc:9443/v1/async",
+   "componentname": "connector",
+   "connectionid": "21e66e3f-15c7-4483-951b-8c3c035b1b4b",
+   "reqid": "e82e99ca-827a-4ec1-b0c2-3ae78e16781a",
+   "data": {
+      "patterns":["^IBM/cp4waiops-connectors-java-template.*"],
+       "token": "WRONGTOKEN",
+       "uri": "https://github.com"
+   }
+}

@@ -1,0 +1,74 @@
+apiVersion: connectors.aiops.ibm.com/v1beta1
+kind: ConnectorSchema
+metadata:
+  name: connector-template
+spec:
+  categories:
+    - events
+  ceType: com.ibm.watson.aiops.connectors.template.configuration
+  components:
+    - apiType: AsyncAPI
+      name: connector
+  documentation: >-
+    https://github.com/IBM/cp4waiops-connectors-java-template/blob/main/README.md
+  schema:
+    additionalProperties: false
+    oneOf:
+      - required:
+          - uri
+    properties:
+      uri:
+        default: 'https://www.ibm.com'
+        description: >-
+          URI of the website to test. defaults to https://www.ibm.com
+        format: uri
+        title: URI
+        type: string
+    type: object
+  uiSchema:
+    isObserver: false
+    hasAIModelType: false
+    formSteps:
+      - step:
+          id: addConnection
+          name: '{{formSteps.addConnection}}'
+    form:
+      - apiMapping: connection_config.display_name
+        element: input
+        formStep: addConnection
+        id: name
+        isRequired: true
+        label: '{{connector.common.form.uniqueID.label}}'
+        placeholder: '{{connector.common.form.ops_integration_name.placeholder}}'
+        type: text
+      - apiMapping: connection_config.description
+        element: input
+        formStep: addConnection
+        id: description
+        label: '{{connector.common.form.description.label}}'
+        placeholder: '{{connector.common.form.description.placeholder}}'
+        type: textarea
+      - isURL: true
+        isRequired: true
+        formStep: addConnection
+        placeholder: 'www.ibm.com'
+        apiMapping: connection_config.uri
+        label: 'Connector Template URI'
+        type: text
+        id: uri
+        helperText: '{{common.egress_warning}}'
+        element: input
+    hasOptionalText: false
+    sidePanelInfoHeader: '{{sidePanel.information.header}}'
+    sidePanelTitle: 'Connector Template'
+    displayName: 'Connector Template'
+    url: 'https://github.com/IBM/cp4waiops-connectors-java-template/blob/main/README.md'
+    iconFileType: png
+    sidePanelDescription: 'An example'
+    type: connector-template
+    sidePanelInfo:
+      - '{{common.egress_warning}}'
+    categories:
+      - '{{connector.common.category.events}}'
+    hasOptionalConfig: false
+    datasourceType: events

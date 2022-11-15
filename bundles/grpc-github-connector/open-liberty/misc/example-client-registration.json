@@ -1,0 +1,33 @@
+{
+    "allow_regexp_redirects": false,
+    "appPasswordAllowed": false,
+    "appTokenAllowed": false,
+    "application_type": "web",
+    "client_id": "example-template-connector-1938af98",
+    "client_name": "example-template-connector-1938af98",
+    "client_secret": "cryptographically-secure-value",
+    "client_secret_expires_at": 0,
+    "functional_user_groupIds": [
+        "read:connectionid:dd28ea9f-7fcc-4622-ace8-14f8e6f37473",
+        "write:connectionid:dd28ea9f-7fcc-4622-ace8-14f8e6f37473"
+    ],
+    "functional_user_id": "connector:dd28ea9f-7fcc-4622-ace8-14f8e6f37473",
+    "grant_types": [
+        "client_credentials"
+    ],
+    "hash_itr": 0,
+    "hash_len": 0,
+    "introspect_tokens": true,
+    "post_logout_redirect_uris": [],
+    "preauthorized_scope": "openid",
+    "proofKeyForCodeExchange": false,
+    "publicClient": false,
+    "redirect_uris": [],
+    "resource_ids": [],
+    "response_types": [
+        "token"
+    ],
+    "scope": "openid",
+    "token_endpoint_auth_method": "client_secret_basic",
+    "trusted_uri_prefixes": []
+}
