@@ -1,0 +1,13 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: github
+spec:
+  to:
+    kind: Service
+    name: ibm-grpc-github-connector
+  port:
+    targetPort: 8080
+  tls:
+    termination: reencrypt
+    insecureEdgeTerminationPolicy: Allow

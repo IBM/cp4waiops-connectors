@@ -1,0 +1,42 @@
+---
+apiVersion: connectors.aiops.ibm.com/v1beta1
+kind: AIOpsKafkaTopic
+metadata:
+  name: cp4waiops-cartridge.connector-github-actions
+spec:
+  topicName: cp4waiops-cartridge.connector-github-actions
+---
+apiVersion: connectors.aiops.ibm.com/v1beta1
+kind: AIOpsKafkaTopic
+metadata:
+  name: cp4waiops-cartridge.repository
+spec:
+  topicName: cp4waiops-cartridge.repository
+---
+apiVersion: connectors.aiops.ibm.com/v1beta1
+kind: AIOpsKafkaTopic
+metadata:
+  name: cp4waiops-cartridge.issue
+spec:
+  topicName: cp4waiops-cartridge.issue
+---
+apiVersion: connectors.aiops.ibm.com/v1beta1
+kind: AIOpsKafkaTopic
+metadata:
+  name: cp4waiops-cartridge.pr
+spec:
+  topicName: cp4waiops-cartridge.pr
+---
+apiVersion: connectors.aiops.ibm.com/v1beta1
+kind: AIOpsKafkaTopic
+metadata:
+  name: cp4waiops-cartridge.commit
+spec:
+  topicName: cp4waiops-cartridge.commit
+---
+apiVersion: connectors.aiops.ibm.com/v1beta1
+kind: AIOpsKafkaTopic
+metadata:
+  name: cp4waiops-cartridge.status
+spec:
+  topicName: cp4waiops-cartridge.status 
