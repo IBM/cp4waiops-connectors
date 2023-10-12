@@ -1,4 +1,4 @@
-# IBM CloudPak for Watson AiOps Connectors
+# IBM CloudPak for Watson AIOps Connectors
 - A connector is an integration between Watson AIOps and a particular data source.
 - Connectors are packaged as a container image that runs a gRPC client inside and communicates back to the Watson AIOps main cluster via a gRPC channel.
 - The preferred programming model is via Open Liberty. However, any other gRPC-enabled programming model (such as Node.js) can also be used - provided it is a supported runtime.
