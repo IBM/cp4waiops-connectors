@@ -1,0 +1,311 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: aiopsedge-github-topology-integrator
+data:
+  github-observer.yml: |
+
+    id: ${GITHUB_OBSERVER_ID}
+    name: ${KAFKA_PREFIX}.github-observer
+    version: 1.1.0
+    supportedTargetSystemVersion: n/a
+    supportedTargetAPIVersion: n/a
+
+    # Configuration section for this Observer service.
+    jobProcessingThreads: 10
+    reaperInterval: 60 seconds
+    topologyService: https://${TOPOLOGY_SERVICE_HOST}:${TOPOLOGY_SERVICE_PORT}
+
+    # Connector Kafka configuration
+    connectorKafkaDefaultBootstrapServers: ${KAFKA_SERVER}
+
+    connectorKafkaBootstrapServers: ${KAFKA_SERVER}
+    connectorKafkaTopic: ${KAFKA_PREFIX}.repository
+    connectorKafkaGroup: ${KAFKA_PREFIX}.github-observer
+
+    swagger:
+      apiPackages:
+        - com.ibm.itsm.topology.observer.github.api
+        - com.ibm.itsm.topology.observer.github.jobs
+        - com.ibm.itsm.topology.observer.api
+        - com.ibm.itsm.topology.service.config.swagger.definition
+
+    # Service HTTP/HTTPS server settings.
+    server:
+      rootPath: ${ROOT_PATH:-/1.0/github-observer/}
+      applicationConnectors:
+        - type: https
+          port: 9162
+          keyStorePath: ${KEYSTORE_PATH}
+          keyStorePassword: ${KEYSTORE_PASS}
+          trustStorePath: ${TRUSTSTORE_PATH}
+          trustStorePassword: ${TRUSTSTORE_PASS}
+          certAlias: ${KEYSTORE_ALIAS:-private}
+          excludedCipherSuites: [.*_(MD5|SHA|SHA1)$, ^TLS_RSA_.*$, ^.*_NULL_.*$, ^.*_anon_.*$]
+          supportedProtocols: [SSLv2Hello, TLSv1.2]
+      adminConnectors:
+        - type: https
+          port: 9163
+          keyStorePath: ${KEYSTORE_PATH}
+          keyStorePassword: ${KEYSTORE_PASS}
+          certAlias: ${KEYSTORE_ALIAS:-private}
+          excludedCipherSuites: [.*_(MD5|SHA|SHA1)$, ^TLS_RSA_.*$, ^.*_NULL_.*$, ^.*_anon_.*$]
+          supportedProtocols: [SSLv2Hello, TLSv1.2]
+      requestLog:
+        appenders: []
+
+    # HTTP client configuration; for making REST API operations
+    httpClient:
+      timeout: ${HTTPCLIENT_TIMEOUT:-120000ms}
+      connectionTimeout: ${HTTPCLIENT_CONNECTION_TIMEOUT:-10000ms}
+      timeToLive: 1h
+      cookiesEnabled: false
+      maxConnections: 1024
+      maxConnectionsPerRoute: 1024
+      keepAlive: 0ms
+      retries: 2
+      tls:
+        trustSelfSignedCertificates: true
+        verifyHostname: false
+
+    # Logging settings.
+    logging:
+      # The default level of all loggers. Can be OFF, ERROR, WARN, INFO, DEBUG, TRACE, or ALL.
+      level: ${LOG_LEVEL:-INFO}
+      loggers:
+        org.eclipse.jetty.util.ssl.SslContextFactory.config: INFO
+      appenders:
+        - type: console
+          threshold: ${LOGGING_CONSOLE_THRESHOLD:-INFO}
+          logFormat: "%-6level [%d] [%t] %logger{5} - %X{code} %msg %n"
+        - type: file
+          threshold: ${LOGGING_FILE_THRESHOLD:-DEBUG}
+          logFormat: "%-6level [%d] [%t] %logger{5} - %X{code} %msg %n"
+          currentLogFilename: /var/log/itsm/github-observer/github-observer.log
+          archivedLogFilenamePattern: /var/log/itsm/github-observer/archive/github-observer-%d{yyyy-MM-dd}-%i.log.gz
+          archive: true
+          archivedFileCount: ${LOG_RETENTION_DAYS:-5}
+          timeZone: UTC
+          maxFileSize: 10MB
+
+    authEnabled: 1
+
+    pac4j:
+      # those protect the whole application at Jersey level
+      globalFilters:
+        - matchers: excludeUserSession
+          authorizers: isAuthenticated
+      matchers:
+        excludeUserSession:
+          class: org.pac4j.core.matching.matcher.PathMatcher
+          excludedPaths: [/service/info, /swagger, /swagger/, /healthcheck, /swagger.json, /supportedVersion]
+      clients:
+        - org.pac4j.http.client.direct.DirectBasicAuthClient:
+            authenticator:
+              class: ${ASM_AUTHENTICATOR:-com.ibm.itsm.topology.service.auth.BasicAuthenticator}
+  start.sh: |
+    #!/bin/bash
+    export PATH=$PATH:$JAVA_HOME/bin
+
+    mkdir -p /opt/ibm/netcool/asm/data/github-observer
+
+    # create dir for backup/import tools
+    mkdir -p /opt/ibm/netcool/asm/data/tools
+
+    APP_JAR=/opt/ibm/github-observer/github-observer.jar
+
+    if [ -z ${COMMAND} ]; then
+      # By default, spin up the dropwizard app unless a specific command has been given
+      COMMAND=server
+      APP_YML=${ALT_YML:-"/opt/ibm/github-observer/github-observer.yml"}
+      ARGS=$APP_YML
+    else
+      ARGS="$@"
+    fi
+
+    if [ ! -z "$JVM_ARGS" ]; then
+      echo "Using JVM args $JVM_ARGS"
+    fi
+
+    # Option to supply an init script, to be run prior to start up and https config
+    if [ ! -z ${INIT} ]; then
+      echo "$(date) Reading and executing ${INIT}"
+      source $INIT
+      echo "$(date) Reading and executing ${INIT}: DONE"
+    fi
+
+    # check for encryption key, use default if not present
+    if [ ! -e /opt/ibm/netcool/asm/security/crypto.key ] && [ -w /opt/ibm/netcool/asm/security/ ]; then
+      cp /var/opt/itsm/asm/security/default/crypto.key /opt/ibm/netcool/asm/security/crypto.key
+    fi
+
+    function buildJavaKeyStores() {
+
+      echo "$(date) Generating keystore from certificate and key for ${SERVICE} "
+      openssl pkcs12 \
+              -export \
+              -in ${SVC_CRT} \
+              -inkey ${SVC_KEY} \
+              -name ${SERVICE} \
+              -out ${KEYSTORE_PATH}.p12 \
+              -passin pass:${KEYSTORE_PASS} \
+              -passout pass:${KEYSTORE_PASS}
+
+      echo "$(date) Converting keystore from pkcs12 to jks"
+      keytool -importkeystore \
+              -destkeystore ${KEYSTORE_PATH} \
+              -deststorepass ${KEYSTORE_PASS}  \
+              -srcstoretype PKCS12 \
+              -srckeystore ${KEYSTORE_PATH}.p12 \
+              -srcstorepass ${KEYSTORE_PASS}  \
+              -destkeypass ${KEYSTORE_PASS}
+
+      echo "$(date) Import CA certificate(s) into truststore ${TRUSTSTORE_PATH}"
+      csplit -z -f {CA_CERTIFICATE_NAME}- ${CA_CRT} '/-----BEGIN CERTIFICATE-----/' '{*}'
+      for file in {CA_CERTIFICATE_NAME}-*; do
+        keytool -import \
+                -alias ${file} \
+                -file ${file} \
+                -keystore ${TRUSTSTORE_PATH} \
+                -storetype ${STORETYPE} \
+                -storepass ${TRUSTSTORE_PASS} \
+                -noprompt
+      done
+
+      echo "$(date) Import cacerts into truststore ${TRUSTSTORE_PATH}"
+      keytool -importkeystore \
+              -srckeystore ${JAVA_HOME}/lib/security/cacerts \
+              -srcstorepass changeit \
+              -destkeystore ${TRUSTSTORE_PATH} \
+              -deststorepass ${TRUSTSTORE_PASS}
+
+      echo "$(date) Import CA certificate(s) into cacerts"
+      csplit -z -f {CA_CERTIFICATE_NAME}- ${CA_CRT} '/-----BEGIN CERTIFICATE-----/' '{*}'
+      for file in {CA_CERTIFICATE_NAME}-*; do
+        keytool -import \
+                -alias ${file} \
+                -file ${file} \
+                -keystore ${JAVA_HOME}/lib/security/cacerts \
+                -storepass changeit \
+                -noprompt
+      done
+
+      echo "$(date) Import kafka certificate(s) into cacerts"
+      keytool -importkeystore \
+              -srckeystore ${KAFKA_CREDENTIALS_PATH}/truststore.jks \
+              -srcstorepass $(cat ${KAFKA_CREDENTIALS_PATH}/truststore.password) \
+              -destkeystore ${TRUSTSTORE_PATH} \
+              -deststorepass ${TRUSTSTORE_PASS}
+
+      if [ -d /opt/ibm/elasticsearch/tls ]; then
+        # create dir where we can write
+        mkdir -p /tmp/es-certs/ && cd /tmp/es-certs
+        # split cert chains
+        for cert in /opt/ibm/elasticsearch/tls/*.crt; do
+          echo ${cert}
+          csplit -z -f elastic-$(basename ${cert})-part ${cert} '/-----BEGIN CERTIFICATE-----/' '{*}'
+        done
+        # add certs to truststore
+        for cert in *; do
+          echo "$(date) Import ${cert} into truststore ${TRUSTSTORE_PATH}"
+          keytool -import \
+                  -alias ${cert} \
+                  -file ${cert} \
+                  -keystore ${TRUSTSTORE_PATH} \
+                  -storetype ${STORETYPE} \
+                  -storepass ${TRUSTSTORE_PASS} \
+                  -noprompt
+        done
+      fi
+
+      # make sure our config settings are available to the application
+      export KEYSTORE_ALIAS KEYSTORE_PATH KEYSTORE_PASS TRUSTSTORE_ALIAS TRUSTSTORE_PATH TRUSTSTORE_PASS
+
+    }
+
+    function startJob() {
+      echo "verifying job exists"
+      status=$(curl -X GET "https://${SERVICE_NAME}:9162/1.0/github-observer/jobs/listen_github" \
+                    -s -o /dev/null -w "%{http_code}" \
+                    --cacert "$SVC_CRT" \
+                    --header 'Content-Type: application/json' \
+                    --header 'Accept: application/json' \
+                    --header 'X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255' \
+                    -u "${ASM_USER}:${ASM_PASS}")
+      if [ "$status" -eq 200 ]; then
+        echo "job exists"
+      else
+        echo "creating job"
+        curl -X POST "https://${SERVICE_NAME}:9162/1.0/github-observer/jobs/listen" \
+             --cacert "$SVC_CRT" \
+             --header 'Content-Type: application/json' \
+             --header 'Accept: application/json' \
+             --header 'X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255' \
+             -u "${ASM_USER}:${ASM_PASS}" \
+             -d '{
+                   "unique_id": "listen_github",
+                   "type": "string",
+                   "description": "listens for github graph related changes",
+                   "parameters": {
+                     "provider": "GITHUB.OBSERVER:github"
+                   },
+                   "scheduleRequest": false
+                 }'
+      fi
+    }
+
+    function scheduleJob() {
+      while true; do
+        sleep 90
+      echo "ensuring job is scheduled"
+        startJob
+      sleep 210
+      done
+    }
+
+    SERVICE=$(hostname)
+    if [ ! -z "${DISTINGUISHED_NAME}" ]; then
+      SERVICE=${DISTINGUISHED_NAME}
+    fi
+    STORETYPE=JKS
+    KEYSTORE_ALIAS=${SERVICE}
+    KEYSTORE_PASS=$(openssl rand -base64 32)
+    KEYSTORE_PATH=/var/opt/itsm/asm/security/keystore.jks
+    TRUSTSTORE_ALIAS=${SERVICE}
+    TRUSTSTORE_PATH=/var/opt/itsm/asm/security/truststore.jks
+    TRUSTSTORE_PASS=${KEYSTORE_PASS}
+
+    CA_CRT=/opt/ibm/netcool/asm/security/service-ca.crt
+    CA_CERTIFICATE_NAME=$(basename ${CA_CRT})
+    SVC_CRT=/opt/ibm/github/cert/tls.crt
+    SVC_KEY=/opt/ibm/github/cert/tls.key
+
+    buildJavaKeyStores
+
+    if [ ! -z ${APP_YML} ]; then
+      # update dropwizard config - mostly for turning https off
+      # this will never work if the config is loaded from a configmap
+      python /opt/ibm/netcool/asm/bin/update-dropwizard-config.py $APP_YML
+    fi
+
+    export KAFKA_TOPIC_LIFECYCLE_EVENTS=${KAFKA_PREFIX}.lifecycle.input.events
+    export KAFKA_TOPIC_LIFECYCLE_ALERT_QUERY=${KAFKA_PREFIX}.lifecycle.output.topology-alert-query
+    export KAFKA_TOPIC_LIFECYCLE_ALERT_RESPONSE=${KAFKA_PREFIX}.lifecycle.output.topology-alert-response
+    export KAFKA_TOPIC_TOPOLOGY_INPUT_PROVIDERS=${KAFKA_PREFIX}.topology.input.providers
+    export KAFKA_TOPIC_TOPOLOGY_INPUT_RESOURCES=${KAFKA_PREFIX}.topology.input.resources
+    export KAFKA_TOPIC_TOPOLOGY_OUTPUT_EDGES=${KAFKA_PREFIX}.topology.output.edges
+    export KAFKA_TOPIC_TOPOLOGY_OUTPUT_GROUPS=${KAFKA_PREFIX}.topology.output.groups
+    export KAFKA_TOPIC_TOPOLOGY_OUTPUT_MERGES=${KAFKA_PREFIX}.topology.output.merges
+    export KAFKA_TOPIC_TOPOLOGY_OUTPUT_MANAGEMENT_ARTIFACTS=${KAFKA_PREFIX}.topology.output.management-artifacts
+    export KAFKA_TOPIC_TOPOLOGY_OUTPUT_METADATA=${KAFKA_PREFIX}.topology.output.metadata
+    export KAFKA_TOPIC_TOPOLOGY_OUTPUT_REBROADCAST=${KAFKA_PREFIX}.topology.output.rebroadcast
+    export KAFKA_TOPIC_TOPOLOGY_OUTPUT_RESOURCES=${KAFKA_PREFIX}.topology.output.resources
+    export KAFKA_TOPIC_TOPOLOGY_OUTPUT_RULES=${KAFKA_PREFIX}.topology.output.rules
+    export KAFKA_TOPIC_TOPOLOGY_OUTPUT_TYPES=${KAFKA_PREFIX}.topology.output.types
+    export KAFKA_TOPIC_TOPOLOGY_SCHEDULES=${KAFKA_PREFIX}.topology.schedules
+    export KAFKA_TOPIC_TOPOLOGY_TEMPLATES=${KAFKA_PREFIX}.topology.templates
+
+    scheduleJob &
+
+    echo "Running java -Dcom.ibm.jsse2.overrideDefaultTLS=true $JVM_ARGS -jar $APP_JAR $COMMAND $ARGS"
+    exec java -Dcom.ibm.jsse2.overrideDefaultTLS=true $JVM_ARGS -jar $APP_JAR $COMMAND $ARGS

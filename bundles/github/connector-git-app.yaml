@@ -1,0 +1,20 @@
+apiVersion: connectors.aiops.ibm.com/v1beta1
+kind: GitApp
+metadata:
+  name: ibm-grpc-github-connector-bundle
+spec:
+  repo: 'https://cp4waiops-connectors-deploy.{{ .Namespace }}.svc/git/cp4waiops-connectors'
+  branch: bundled-version
+  authSecret:
+    name: cp4waiops-connectors-deploy-auth-secret
+  certSecret:
+    name: cp4waiops-connectors-deploy-cert-secret
+  components:
+    - name: connector
+      path: /bundles/connectors/github/connector
+      type: kustomize
+      kustomization:
+        images:
+          - name: ibm-grpc-github-connector
+            newName: hyc-connector-framework-team-integrations-docker-local.artifactory.swg-devops.com/cp/aiopsedge/ibm-grpc-github-connector 
+            newTag: unreleased-main-latest

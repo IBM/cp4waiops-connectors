@@ -1,0 +1,15 @@
+apiVersion: connectors.aiops.ibm.com/v1beta1
+kind: GitApp
+metadata:
+  name: ibm-grpc-github-prereq-bundle
+spec:
+  authSecret:
+    name: cp4waiops-connectors-deploy-auth-secret
+  branch: bundled-version
+  certSecret:
+    name: cp4waiops-connectors-deploy-cert-secret
+  components:
+    - name: deployment
+      path: /bundles/connectors/github/prereqs
+      type: kustomize
+  repo: 'https://cp4waiops-connectors-deploy.{{ .Namespace }}.svc/git/cp4waiops-connectors'

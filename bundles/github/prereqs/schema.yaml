@@ -1,0 +1,237 @@
+apiVersion: connectors.aiops.ibm.com/v1beta1
+kind: ConnectorSchema
+metadata:
+  name: github
+spec:
+  categories:
+    - events
+  ceType: com.ibm.watson.aiops.connectors.template.configuration
+  components:
+    - apiType: AsyncAPI
+      name: connector
+  documentation: https://github.ibm.com/quicksilver/cp4waiops-grpc-templates/blob/master/open-liberty/README.md
+  permissions:
+    channels:
+      - name: cp4waiops-cartridge.connector-github-actions
+        operations:
+          - read
+          - write
+      - name: cp4waiops-cartridge.lifecycle.input.events
+        operations:
+          - write
+      - name: cp4waiops-cartridge.repository
+        operations:
+          - write
+  schema:
+    additionalProperties: false
+    oneOf:
+      - required:
+          - uri
+          - token
+          - patterns
+      - required:
+          - uri
+          - vault_ref
+          - patterns
+      - required:
+          - uri
+          - vault_reference
+          - patterns
+    properties:
+      description:
+        description: Information provided by the user on the GitHub connection
+        type: string
+      patterns:
+        items:
+          format: regex
+          type: string
+        minItems: 1
+        type: array
+        uniqueItems: true
+      target:
+        minLength: 1
+        type: string
+      test:
+        default: false
+        description: Performs a test / dry-run of the connection
+        title: Test Request
+        type: boolean
+      live:
+        default: false
+        description: When live is true, enable webhook data
+        title: Get webhook live data
+        type: boolean
+      insecure_webhook:
+        default: false
+        description: When insecure_webhook is true, allow insecure traffic between
+          github and the router
+        title: insecure webhook traffic
+        type: boolean
+      token:
+        default: ''
+        description: Deprecated - this field is ignored
+        format: secret
+        title: Deprecated
+        type: string
+      uri:
+        default: https://github.com
+        description: URI of the source control management platform - defaults to https://github.com
+        format: uri
+        title: URI
+        type: string
+      vault_ref:
+        default: ''
+        description: vault secret name
+        title: Vault Secret Name
+        type: string
+      vault_reference:
+        properties:
+          path:
+            description: The path to the access token in vault secret. i.e. "/ibm-vault-access/data/github-token-secret"
+            title: path
+            type: string
+          key:
+            description: The key to the access token in vault secret. i.e. "accessToken"
+            title: path
+            type: string
+        type: object
+    type: object
+  uiSchema:
+    type: github
+    displayName: "{{connector.github.name}}"
+    iconFileType: png
+    categories: 
+      - "{{connector.common.category.topology}}"
+    url: https://ibm.biz/int-github
+    isObserver: false
+    apiAdaptor: grpc
+    datasourceType: events
+    sidePanelTitle: "{{sidePanel.title.github}}"
+    sidePanelDescription: "{{connector.github.sidepanel.description}}"
+    sidePanelInfoHeader: "{{sidePanel.information.header}}"
+    sidePanelInfo:
+      - "{{common.egress_warning}}"
+      - "{{sidePanel.information.github.1}}"
+      - "{{sidePanel.information.github.2}}"
+      - "{{sidePanel.information.github.3}}"
+      - "{{sidePanel.information.github.4}}"
+      - "{{sidePanel.information.github.5}}"
+    hasOptionalConfig: false
+    hasOptionalText: false
+    hasAIModelType: false
+    formSteps:
+      - step:
+          id: addConnection
+          name: "{{formSteps.addConnection}}"
+      - step:
+          id: monitoring
+          name: "{{formSteps.monitoring}}"
+          isOptional: true
+    form:
+      - id: name
+        element: input
+        isDisabledOnUpdate: true
+        type: text
+        label: "{{connector.common.form.uniqueID.label}}"
+        placeholder: "{{connector.common.form.ops_integration_name.placeholder}}"
+        apiMapping: connection_config.display_name
+        formStep: addConnection
+        isRequired: true
+        isAlphanumeric: true
+      - id: uri
+        element: input
+        type: text
+        label: "{{connector.github.uri.label}}"
+        placeholder: "{{connector.github.uri.placeholder}}"
+        helperText: "{{common.egress_warning}}"
+        apiMapping: connection_config.uri
+        formStep: addConnection
+        isRequired: true
+        isURL : true
+      - id: dynamic_custom_form
+        element: form
+        label: "{{connector.github.vault.form.label}}"
+        items: 
+          - "{{connector.github.vault.form.items.credentials}}"
+          - "{{connector.github.vault.form.items.vault}}"
+        itemKeys: ["token", "vault"]
+        apiMapping: creds-choice
+        formStep: addConnection
+        form:
+          - id: token
+            rows:
+              - id: token
+                element: input
+                type: password
+                label: "{{connector.common.form.api_key.label}}"
+                placeholder: "{{connector.common.form.api_key.placeholder}}"
+                apiMapping: connection_config.token
+                isRequired: true
+          - id: vault
+            rows:
+              - id: vault_path
+                element: input
+                type: text
+                label: "{{connector.github.vault.form.field.label}}"
+                placeholder: "{{connector.github.vault.form.field.placeholder}}"
+                apiMapping: connection_config.vault_reference.path
+                helperText: "{{connector.github.vault.form.field.helperText}}"
+                isRequired: true
+              - id: vault_key
+                element: input
+                type: text
+                label: "{{connector.github.vaultKey.form.field.label}}"
+                placeholder: "{{connector.github.vaultKey.form.field.placeholder}}"
+                apiMapping: connection_config.vault_reference.key
+                helperText: "{{connector.github.vaultKey.form.field.helperText}}"
+                isRequired: true
+      - id: patterns
+        element: input
+        type: text
+        label: "{{connector.github.patterns.label}}"
+        placeholder: "{{connector.github.patterns.placeholder}}"
+        helperText: "{{connector.github.patterns.helperText}}"
+        apiMapping: connection_config.patterns
+        formStep: addConnection
+        isRequired: true
+        isArray: true
+      - id: target
+        element: input
+        type: text
+        label: "{{connector.github.target.label}}"
+        placeholder: "{{connector.github.target.placeholder}}"
+        helperText: "{{connector.github.target.helperText}}"
+        apiMapping: connection_config.target
+        formStep: addConnection
+        isRequired: true
+      - id: orchestration
+        element: input
+        type: radio
+        label: "{{connector.common.form.orchestration.label}}"
+        items: 
+          - "{{connection_form.dynamic_item.local}}"
+          - "{{connection_form.dynamic_item.remote}}"
+        itemKeys: ["local", "microedge"]
+        apiMapping: connection_config.deploymentType
+        formStep: addConnection
+      - id: data_flow
+        element: input
+        type: toggle
+        defaultToggled: false
+        label: "{{connector.common.form.data_flow.label}}"
+        labelOff: "{{common.Off}}"
+        labelOn: "{{common.On}}"
+        description: "{{connector.common.form.data_flow.description}}"
+        apiMapping: connection_config.live
+        headerLabel: "{{connector.github.form.data_collection.logs.headerLabel}}"
+        headerLabelLink: https://ibm.biz/int-github
+        formStep: monitoring
+      - id: insecure_webhook
+        element: input
+        type: toggle
+        defaultToggled: false
+        label: "{{connector.github.form.insecure_webhook.label}}"
+        labelOff: "{{common.Off}}"
+        labelOn: "{{common.On}}"
+        apiMapping: connection_config.insecure_webhook
+        formStep: monitoring

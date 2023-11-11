@@ -1,0 +1,223 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aiopsedge-github-topology-integrator
+  labels:
+    app: aiopsedge-github-topology-integrator
+spec:
+  selector:
+    matchLabels:
+      connector.aiops.ibm.com/name: aiopsedge-github-topology-integrator
+  template:
+    metadata:
+      labels:
+        connector.aiops.ibm.com/name: aiopsedge-github-topology-integrator
+    spec:
+      restartPolicy: Always
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values:
+                      - amd64
+                  - key: kubernetes.io/os
+                    operator: In
+                    values:
+                      - linux
+      initContainers:
+        - resources:
+            limits:
+              cpu: '1'
+              ephemeral-storage: 200Mi
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              ephemeral-storage: 10Mi
+              memory: 128Mi
+          terminationMessagePath: /dev/termination-log
+          name: wait-for-topology
+          command:
+            - /bin/sh
+            - '-c'
+            - /opt/ibm/netcool/asm/bin/check-service-endpoint-count.sh
+          env:
+            - name: SERVICE
+              value: aiops-topology-topology
+            - name: EXPECTED_COUNT
+              value: '1'
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            runAsNonRoot: true
+            readOnlyRootFilesystem: false
+            allowPrivilegeEscalation: false
+          imagePullPolicy: IfNotPresent
+          terminationMessagePolicy: File
+          image: nasm-github-observer
+      serviceAccountName: aiopsedge-github-topology-integrator
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - resources:
+            limits:
+              cpu: '1'
+              memory: 500Mi
+            requests:
+              cpu: 200m
+              memory: 450Mi
+          readinessProbe:
+            httpGet:
+              path: /healthcheck
+              port: 9163
+              scheme: HTTPS
+            initialDelaySeconds: 60
+            timeoutSeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          terminationMessagePath: /dev/termination-log
+          name: observer
+          command:
+            - /bin/sh
+            - '-c'
+            - /opt/ibm/github/config/start.sh
+          livenessProbe:
+            httpGet:
+              path: /healthcheck
+              port: 9163
+              scheme: HTTPS
+            initialDelaySeconds: 60
+            timeoutSeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 6
+          env:
+            - name: GITHUB_OBSERVER_ID
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+            - name: SERVICE_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: SERVICE_NAME
+              value: aiopsedge-github-topology-integrator.$(SERVICE_NAMESPACE).svc
+            - name: ALT_YML
+              value: /opt/ibm/github/config/github-observer.yml
+            - name: KAFKA_SERVER
+              valueFrom:
+                secretKeyRef:
+                  name: aiopsedge-kafka-application-secret
+                  key: bootstrapServers
+            - name: KAFKA_TLS_ENABLED
+              value: 'true'
+            - name: KAFKA_AUTH_TYPE
+              valueFrom:
+                secretKeyRef:
+                  name: aiopsedge-kafka-application-secret
+                  key: saslType
+            - name: KAFKA_CLIENT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: aiopsedge-kafka-application-secret
+                  key: user
+            - name: KAFKA_CLIENT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: aiopsedge-kafka-application-secret
+                  key: password
+            - name: KAFKA_CREDENTIALS_PATH
+              value: /etc/kafka
+            - name: KAFKA_PREFIX
+              value: cp4waiops-cartridge
+            - name: TOPOLOGY_SERVICE_HOST
+              value: aiops-topology-topology
+            - name: TOPOLOGY_SERVICE_PORT
+              value: '8080'
+            - name: LOGGING_CONSOLE_THRESHOLD
+              value: ALL
+            - name: LOGGING_FILE_THRESHOLD
+              value: 'OFF'
+            - name: JVM_ARGS
+              value: '-Xms128M -Xmx400M'
+            - name: ASM_USER
+              valueFrom:
+                secretKeyRef:
+                  name: aiops-topology-asm-credentials
+                  key: username
+            - name: ASM_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: aiops-topology-asm-credentials
+                  key: password
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            runAsNonRoot: true
+            readOnlyRootFilesystem: false
+            allowPrivilegeEscalation: false
+          ports:
+            - containerPort: 9162
+              protocol: TCP
+            - containerPort: 9163
+              protocol: TCP
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: config
+              mountPath: /opt/ibm/github/config
+            - name: server-cert
+              readOnly: true
+              mountPath: /opt/ibm/github/cert
+            - name: asm-security
+              readOnly: true
+              mountPath: /opt/ibm/netcool/asm/security
+            - name: kafka
+              readOnly: true
+              mountPath: /etc/kafka
+            - name: logs
+              mountPath: /var/log/itsm
+          terminationMessagePolicy: FallbackToLogsOnError
+          image: nasm-github-observer
+      serviceAccount: aiopsedge-github-topology-integrator
+      volumes:
+        - name: config
+          configMap:
+            name: aiopsedge-github-topology-integrator
+            defaultMode: 511
+            optional: false
+        - name: server-cert
+          secret:
+            secretName: aiopsedge-github-topology-integrator-tls-cert
+            defaultMode: 420
+            optional: false
+        - name: asm-security
+          projected:
+            sources:
+              - secret:
+                  name: aiops-topology-ca-secret
+                  optional: false
+              - secret:
+                  name: aiops-topology-custom-secrets
+                  optional: true
+              - configMap:
+                  name: aiops-topology-service-ca
+                  optional: false
+            defaultMode: 420
+        - name: kafka
+          secret:
+            secretName: aiopsedge-kafka-application-secret
+            defaultMode: 436
+            optional: false
+        - name: logs
+          emptyDir: {}
+  strategy:
+    type: RollingUpdate

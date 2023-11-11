@@ -1,0 +1,6 @@
+apiVersion: connectors.aiops.ibm.com/v1beta1
+kind: MicroEdgeConfiguration
+metadata:
+  name: github
+spec:
+  image: ibm-grpc-github-connector

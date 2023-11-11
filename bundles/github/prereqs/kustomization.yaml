@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+configurations:
+  - custom-images.yaml
+
+resources:
+  - schema.yaml
+  - microedgeconfiguration.yaml
+  - topics.yaml
+  - observer-role.yaml
+  - observer-rolebinding.yaml
+  - observer-service.yaml
+  - observer-configmap.yaml
+  - observer-deployment.yaml
+  - observer-serviceaccount.yaml
+
+images:
+- name: nasm-github-observer
+  newName: hyc-hdm-staging-docker-local.artifactory.swg-devops.com/nasm-github-observer
+  newTag: latest_3.4-amd64
+- name: ibm-grpc-github-connector
+  newName: hyc-connector-framework-team-integrations-docker-local.artifactory.swg-devops.com/cp/aiopsedge/ibm-grpc-github-connector
+  newTag: unreleased-main-latest
