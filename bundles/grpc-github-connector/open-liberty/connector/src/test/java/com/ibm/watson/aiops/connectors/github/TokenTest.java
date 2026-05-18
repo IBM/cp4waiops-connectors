@@ -53,19 +53,26 @@ public class TokenTest {
         Assertions.assertEquals("notarealtoken", configuration.getToken());
     }
 
-    @Test
-    @DisplayName("Test verify encrypted token loading")
-    void testVerifyEncryptedToken() throws InterruptedException, IOException {
-        ConnectorConfiguration configuration = new ConnectorConfiguration();
-        
-        String json = TestUtils.getJSONFromTestData("ConnectorConfiguration/BasicEncryptedToken.json");
-
-        configuration.setTokenDecodeCertLocation("src/test/data/ConnectorConfiguration/JWTToken.txt");
-        configuration.loadDataFromJson(json);
-
-        // To avoid having this flagged as a PAT being used, only check a few characters
-        String token = configuration.getToken();
-        Assertions.assertTrue(token.startsWith("ov2IP"));
-        Assertions.assertTrue(token.endsWith("ayRc7"));
-    }
+    // COMMENTED OUT: Test disabled to avoid PSIRT security scanning issues
+    // The test private key in JWTToken.txt has been removed
+    // If you need to test JWT token decryption:
+    // 1. Generate a new test key locally
+    // 2. Do not commit the key to the repository
+    // 3. Use environment variables or local-only test configuration
+    
+    // @Test
+    // @DisplayName("Test verify encrypted token loading")
+    // void testVerifyEncryptedToken() throws InterruptedException, IOException {
+    //     ConnectorConfiguration configuration = new ConnectorConfiguration();
+    //
+    //     String json = TestUtils.getJSONFromTestData("ConnectorConfiguration/BasicEncryptedToken.json");
+    //
+    //     configuration.setTokenDecodeCertLocation("src/test/data/ConnectorConfiguration/JWTToken.txt");
+    //     configuration.loadDataFromJson(json);
+    //
+    //     // To avoid having this flagged as a PAT being used, only check a few characters
+    //     String token = configuration.getToken();
+    //     Assertions.assertTrue(token.startsWith("ov2IP"));
+    //     Assertions.assertTrue(token.endsWith("ayRc7"));
+    // }
 }
